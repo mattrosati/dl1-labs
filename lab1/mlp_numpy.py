@@ -26,50 +26,69 @@ from modules import *
 
 class MLP(object):
     """
-    This class implements a Multi-layer Perceptron in NumPy.
-    It handles the different layers and parameters of the model.
-    Once initialized an MLP object can perform forward and backward.
-    """
+        This class implements a Multi-layer Perceptron in NumPy.
+        It handles the different layers and parameters of the model.
+        Once initialized an MLP object can perform forward and backward.
+        """
 
     def __init__(self, n_inputs, n_hidden, n_classes):
         """
-        Initializes MLP object.
+                Initializes MLP object.
 
-        Args:
-          n_inputs: number of inputs.
-          n_hidden: list of ints, specifies the number of units
-                    in each linear layer. If the list is empty, the MLP
-                    will not have any linear layers, and the model
-                    will simply perform a multinomial logistic regression.
-          n_classes: number of classes of the classification problem.
-                     This number is required in order to specify the
-                     output dimensions of the MLP
+                Args:
+                    n_inputs: number of inputs.
+                    n_hidden: list of ints, specifies the number of units
+                                    in each linear layer. If the list is empty, the MLP
+                                        will not have any linear layers, and the model
+                                        will simply perform a multinomial logistic regression.
+                    n_classes: number of classes of the classification problem.
+                                         This number is required in order to specify the
+                                         output dimensions of the MLP
 
-        TODO:
-        Implement initialization of the network.
-        """
+                TODO:
+                Implement initialization of the network.
+                """
 
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        self.n_inputs = n_inputs
+        self.n_hidden = n_hidden
+        self.n_classes = n_classes
+
+        all = [n_inputs] + n_hidden + [n_classes]
+        self.modules, self.acts = [[]] * (len(n_hidden) + 1)
+        i = 0
+        self.depth = len(all) - 1
+        while i < self.depth:
+            if i == 0:
+                self.modules[i] = LinearModule(
+                    in_features=all[i], out_features=all[i + 1], input_layer=True
+                )
+                self.acts[i] = 
+            else:
+                self.modules[i] = LinearModule(
+                    in_features=all[i], out_features=all[i + 1]
+                )
+            i += 2
+
         #######################
         # END OF YOUR CODE    #
         #######################
 
     def forward(self, x):
         """
-        Performs forward pass of the input. Here an input tensor x is transformed through
-        several layer transformations.
+                Performs forward pass of the input. Here an input tensor x is transformed through
+                several layer transformations.
 
-        Args:
-          x: input to the network
-        Returns:
-          out: outputs of the network
+                Args:
+                    x: input to the network
+                Returns:
+                    out: outputs of the network
 
-        TODO:
-        Implement forward pass of the network.
-        """
+                TODO:
+                Implement forward pass of the network.
+                """
 
         #######################
         # PUT YOUR CODE HERE  #
@@ -83,14 +102,14 @@ class MLP(object):
 
     def backward(self, dout):
         """
-        Performs backward pass given the gradients of the loss.
+                Performs backward pass given the gradients of the loss.
 
-        Args:
-          dout: gradients of the loss
+                Args:
+                    dout: gradients of the loss
 
-        TODO:
-        Implement backward pass of the network.
-        """
+                TODO:
+                Implement backward pass of the network.
+                """
 
         #######################
         # PUT YOUR CODE HERE  #
@@ -102,13 +121,13 @@ class MLP(object):
 
     def clear_cache(self):
         """
-        Remove any saved tensors for the backward pass from any module.
-        Used to clean-up model from any remaining input data when we want to save it.
+                Remove any saved tensors for the backward pass from any module.
+                Used to clean-up model from any remaining input data when we want to save it.
 
-        TODO:
-        Iterate over modules and call the 'clear_cache' function.
-        """
-        
+                TODO:
+                Iterate over modules and call the 'clear_cache' function.
+                """
+
         #######################
         # PUT YOUR CODE HERE  #
         #######################

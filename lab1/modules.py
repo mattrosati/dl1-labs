@@ -139,6 +139,8 @@ class ReLUModule(object):
         # PUT YOUR CODE HERE  #
         #######################
 
+        out = np.maximum(x, 0)
+
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -160,6 +162,8 @@ class ReLUModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
+
+        pass
 
         #######################
         # END OF YOUR CODE    #
@@ -273,6 +277,11 @@ class CrossEntropyModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
+        logged = np.log(x)
+        onehot = np.zeros(y.size, 10)
+        onehot[np.arange(y.size), y] = 1
+
+        out = (1/(x.shape[0])) * (-1 * (logged @ onehot.T))
 
         #######################
         # END OF YOUR CODE    #
