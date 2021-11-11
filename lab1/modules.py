@@ -134,7 +134,7 @@ class ReLUModule(object):
         
         Hint: You can store intermediate variables inside the object. They can be used in backward pass computation.
         """
-        
+
         #######################
         # PUT YOUR CODE HERE  #
         #######################
@@ -281,7 +281,7 @@ class CrossEntropyModule(object):
         onehot = np.zeros(y.size, 10)
         onehot[np.arange(y.size), y] = 1
 
-        out = (1/(x.shape[0])) * (-1 * (logged @ onehot.T))
+        out = (1 / (x.shape[0])) * (-1 * (logged @ onehot.T))
 
         #######################
         # END OF YOUR CODE    #

@@ -65,7 +65,7 @@ class MLP(object):
                 self.modules[i] = LinearModule(
                     in_features=all[i], out_features=all[i + 1], input_layer=True
                 )
-                self.acts[i] = 
+                # self.acts[i] =
             else:
                 self.modules[i] = LinearModule(
                     in_features=all[i], out_features=all[i + 1]
