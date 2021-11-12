@@ -139,7 +139,8 @@ class ReLUModule(object):
         # PUT YOUR CODE HERE  #
         #######################
 
-        out = np.maximum(x, 0)
+        self.x = x
+        out = np.where(x > 0, x, 0)
 
         #######################
         # END OF YOUR CODE    #
@@ -163,7 +164,7 @@ class ReLUModule(object):
         # PUT YOUR CODE HERE  #
         #######################
 
-        pass
+        dx = dout * np.where(self.x > 0, 1, 0)
 
         #######################
         # END OF YOUR CODE    #
@@ -181,7 +182,9 @@ class ReLUModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+
+        del self.x
+
         #######################
         # END OF YOUR CODE    #
         #######################
