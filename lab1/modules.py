@@ -46,6 +46,24 @@ class LinearModule(object):
         # PUT YOUR CODE HERE  #
         #######################
 
+        # initialize weights
+        if input_layer == True:
+            var_factor = 2 / in_features
+        else:
+            var_factor = np.sqrt(2 / in_features)
+
+        self.weight = np.random.multivariate_normal(
+            mean=0,
+            cov=np.identity(out_features * in_features) * var_factor,
+            size=(out_features, in_features),
+        )
+
+        # initialize bias
+        self.bias = np.zeros(out_features)
+
+        # initialize gradients with zeros
+        self.grads = {"weight": np.zeros(self.w.shape), "bias": np.zeros(self.b.shape)}
+
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -68,6 +86,9 @@ class LinearModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
+
+        out = np.eimsum("ij, kj -> ik", x, self.weight) + self.bias[np.newaxis, :]
+        self.x = x
 
         #######################
         # END OF YOUR CODE    #
@@ -93,6 +114,10 @@ class LinearModule(object):
         # PUT YOUR CODE HERE  #
         #######################
 
+        self.grads["weight"] = np.einsum("ji, jk->ik", dout, self.x)
+        self.grads["bias"] = np.sum(dout, axis=0)
+        dx = self.grads
+
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -109,7 +134,8 @@ class LinearModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        del self.x
+        del self.grads
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -242,7 +268,7 @@ class SoftMaxModule(object):
         # PUT YOUR CODE HERE  #
         #######################
         ydy = np.einsum("...i,...i->...i", dout, self.out)
-        a = dout - (ydy @ np.ones(ydy.shape))
+        a = dout - np.sum(ydy, axis=-1, keepdims=True)
         dx = np.einsum("...i,...i->...i", self.out, a)
 
         #######################
@@ -333,5 +359,4 @@ class CrossEntropyModule(object):
 if __name__ == "__main__":
     # Create random data for training the network
     # TODO: do some random tests to make sure stuff is working
-    x = np.random.random((1, 3, 32, 32))
-    y = np.random.randint(0, 9, (1, 3))
+    pass
