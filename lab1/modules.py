@@ -139,8 +139,8 @@ class ReLUModule(object):
         # PUT YOUR CODE HERE  #
         #######################
 
-        self.x = x
         out = np.where(x > 0, x, 0)
+        self.out = out
 
         #######################
         # END OF YOUR CODE    #
@@ -164,7 +164,7 @@ class ReLUModule(object):
         # PUT YOUR CODE HERE  #
         #######################
 
-        dx = dout * np.where(self.x > 0, 1, 0)
+        dx = dout * np.where(self.out > 0, 1, 0)
 
         #######################
         # END OF YOUR CODE    #
@@ -183,7 +183,7 @@ class ReLUModule(object):
         # PUT YOUR CODE HERE  #
         #######################
 
-        del self.x
+        del self.out
 
         #######################
         # END OF YOUR CODE    #
@@ -214,6 +214,12 @@ class SoftMaxModule(object):
         # PUT YOUR CODE HERE  #
         #######################
 
+        a = np.max(x, axis=-1)
+        x_new = x - a[np.newaxis, :]
+        print(x_new.shape)
+        out = np.exp(x_new) / np.sum(np.exp(x_new), axis=-1)
+        self.out = out
+
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -224,7 +230,7 @@ class SoftMaxModule(object):
         """
         Backward pass.
         Args:
-          dout: gradients of the previous modul
+          dout: gradients of the previous module
         Returns:
           dx: gradients with respect to the input of the module
 
@@ -235,6 +241,9 @@ class SoftMaxModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
+        ydy = np.einsum("...i,...i->...i", dout, self.out)
+        a = dout - (ydy @ np.ones(ydy.shape))
+        dx = np.einsum("...i,...i->...i", self.out, a)
 
         #######################
         # END OF YOUR CODE    #
@@ -253,7 +262,7 @@ class SoftMaxModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        del self.out
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -309,8 +318,20 @@ class CrossEntropyModule(object):
         # PUT YOUR CODE HERE  #
         #######################
 
+        onehot = np.zeros(y.size, 10)
+        onehot[np.arange(y.size), y] = 1
+        assert onehot.shape == x.shape
+        dx = (-1 / x.shape[0]) * (onehot / x)
+
         #######################
         # END OF YOUR CODE    #
         #######################
 
         return dx
+
+
+if __name__ == "__main__":
+    # Create random data for training the network
+    # TODO: do some random tests to make sure stuff is working
+    x = np.random.random((1, 3, 32, 32))
+    y = np.random.randint(0, 9, (1, 3))
