@@ -135,15 +135,45 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
     # PUT YOUR CODE HERE  #
     #######################
 
+    dims = np.prod(list(cifar10["train"][0][0].shape))
+    class_num = 10
+
     # TODO: Initialize model and loss module
-    model = ...
-    loss_module = ...
+    model = MLP(dims, hidden_dims, class_num)
+    loss_module = CrossEntropyModule()
     # TODO: Training loop including validation
+    n_batches = len(cifar10_loader["train"])
+    train_loss = np.zeros(epochs)
+    for epoch in range(epochs):
+        print("Training epoch:", epoch + 1)
+        for data, targets in tqdm(cifar10_loader["train"], unit="batch"):
+            # run forward
+            out = model.forward(data)
+
+            # calculate loss
+            loss_batch = loss_module.forward(out, targets)
+            train_loss[epoch] += loss_batch
+
+            # predict labels
+
+            # run backward and update weights
+            loss_back = loss_module.backward(out, targets)
+            model.backward(loss_back)
+            for module in model.modules[::2]:
+                module.params["weight"] -= lr * module.grads["weight"]
+                module.params["bias"] -= lr * module.grads["bias"]
+
+            # model.backward()
+        train_loss[epoch] = train_loss[epoch] / n_batches
+        print("Validation of epoch", epoch + 1)
+
     val_accuracies = ...
+
     # TODO: Test best model
     test_accuracy = ...
     # TODO: Add any information you might want to save for plotting
-    logging_info = ...
+    logging_dict = {"train_loss": train_loss}
+    print(train_loss)
     #######################
     # END OF YOUR CODE    #
     #######################

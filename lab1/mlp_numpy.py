@@ -95,7 +95,6 @@ class MLP(object):
         #######################
 
         x = x.reshape((x.shape[0], -1))
-        print(x.shape)
         for i in self.modules:
             x = i.forward(x)
         out = x
