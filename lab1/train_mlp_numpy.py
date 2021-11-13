@@ -87,7 +87,7 @@ def evaluate_model(model, data_loader):
     accuracy_sum = 0
     for data, targets in data_loader:
         scores = model.forward(data)
-        batch_accuracy = accuracy(scores, targets) / targets.size
+        batch_accuracy = accuracy(scores, targets)
         accuracy_sum += batch_accuracy
 
     avg_accuracy = accuracy_sum / len(data_loader)
@@ -161,6 +161,7 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
     val_loss = np.zeros(epochs)
     val_accuracies = np.zeros(epochs)
 
+    best_accuracy = 0
     for epoch in range(epochs):
         print("Training epoch:", epoch + 1)
         for data, targets in tqdm(cifar10_loader["train"], unit="batch"):
@@ -170,7 +171,7 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
             # calculate loss and accuracy
             loss_batch = loss_module.forward(out, targets)
             train_loss[epoch] += loss_batch / n_batches_train
-            batch_accuracy = accuracy(out, targets) / targets.size
+            batch_accuracy = accuracy(out, targets)
             train_accuracies[epoch] += batch_accuracy
 
             # run backward and update weights
@@ -183,17 +184,19 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
         train_accuracies[epoch] = train_accuracies[epoch] / n_batches_train
 
         print("Validation of epoch", epoch + 1)
-        best_accuracy = 0
         for data, targets in tqdm(cifar10_loader["validation"], unit="batch"):
             out = model.forward(data)
             loss_batchv = loss_module.forward(out, targets)
-            val_loss[epoch] += loss_batchv / targets.size
-            val_accuracies[epoch] += accuracy(out, targets) / targets.size
+            val_loss[epoch] += loss_batchv / n_batches_val
+            val_accuracies[epoch] += accuracy(out, targets)
 
         val_accuracies[epoch] = val_accuracies[epoch] / n_batches_val
 
         if val_accuracies[epoch] > best_accuracy:
-            print("New best model found, copying it.")
+            print(
+                "New best model found, copying it, new best accuracy is",
+                val_accuracies[epoch],
+            )
             model.clear_cache()
             best_model = deepcopy(model)
             best_accuracy = val_accuracies[epoch]
