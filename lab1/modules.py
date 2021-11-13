@@ -139,7 +139,6 @@ class LinearModule(object):
         # PUT YOUR CODE HERE  #
         #######################
         self.x = None
-        self.grads = None
         #######################
         # END OF YOUR CODE    #
         #######################

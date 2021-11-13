@@ -53,6 +53,8 @@ def accuracy(predictions, targets):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
+    predicted_labels = np.argmax(predictions, axis=-1)
+    accuracy = np.mean(predicted_labels == targets)
 
     #######################
     # END OF YOUR CODE    #
@@ -81,6 +83,14 @@ def evaluate_model(model, data_loader):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
+
+    accuracy_sum = 0
+    for data, targets in data_loader:
+        scores = model.forward(data)
+        batch_accuracy = accuracy(scores, targets) / targets.size
+        accuracy_sum += batch_accuracy
+
+    avg_accuracy = accuracy_sum / len(data_loader)
 
     #######################
     # END OF YOUR CODE    #
@@ -141,20 +151,27 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
     # TODO: Initialize model and loss module
     model = MLP(dims, hidden_dims, class_num)
     loss_module = CrossEntropyModule()
+
     # TODO: Training loop including validation
-    n_batches = len(cifar10_loader["train"])
+    n_batches_train = len(cifar10_loader["train"])
+    n_batches_val = len(cifar10_loader["validation"])
+
     train_loss = np.zeros(epochs)
+    train_accuracies = np.zeros(epochs)
+    val_loss = np.zeros(epochs)
+    val_accuracies = np.zeros(epochs)
+
     for epoch in range(epochs):
         print("Training epoch:", epoch + 1)
         for data, targets in tqdm(cifar10_loader["train"], unit="batch"):
             # run forward
             out = model.forward(data)
 
-            # calculate loss
+            # calculate loss and accuracy
             loss_batch = loss_module.forward(out, targets)
-            train_loss[epoch] += loss_batch
-
-            # predict labels
+            train_loss[epoch] += loss_batch / n_batches_train
+            batch_accuracy = accuracy(out, targets) / targets.size
+            train_accuracies[epoch] += batch_accuracy
 
             # run backward and update weights
             loss_back = loss_module.backward(out, targets)
@@ -163,20 +180,39 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
                 module.params["weight"] -= lr * module.grads["weight"]
                 module.params["bias"] -= lr * module.grads["bias"]
 
-            # model.backward()
-        train_loss[epoch] = train_loss[epoch] / n_batches
-        print("Validation of epoch", epoch + 1)
+        train_accuracies[epoch] = train_accuracies[epoch] / n_batches_train
 
-    val_accuracies = ...
+        print("Validation of epoch", epoch + 1)
+        best_accuracy = 0
+        for data, targets in tqdm(cifar10_loader["validation"], unit="batch"):
+            out = model.forward(data)
+            loss_batchv = loss_module.forward(out, targets)
+            val_loss[epoch] += loss_batchv / targets.size
+            val_accuracies[epoch] += accuracy(out, targets) / targets.size
+
+        val_accuracies[epoch] = val_accuracies[epoch] / n_batches_val
+
+        if val_accuracies[epoch] > best_accuracy:
+            print("New best model found, copying it.")
+            model.clear_cache()
+            best_model = deepcopy(model)
+            best_accuracy = val_accuracies[epoch]
 
     # TODO: Test best model
-    test_accuracy = ...
+    test_accuracy = evaluate_model(best_model, cifar10_loader["test"])
+
     # TODO: Add any information you might want to save for plotting
-    logging_dict = {"train_loss": train_loss}
-    print(train_loss)
+    logging_dict = {
+        "train_loss": train_loss,
+        "val_loss": val_loss,
+        "train_acc": train_accuracies,
+        "val_acc": val_accuracies,
+        "test_acc": test_accuracy,
+    }
     #######################
     # END OF YOUR CODE    #
     #######################
+    print(logging_dict)
 
     return model, val_accuracies, test_accuracy, logging_dict
 
