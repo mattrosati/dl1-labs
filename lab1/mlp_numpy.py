@@ -55,22 +55,22 @@ class MLP(object):
         self.n_inputs = n_inputs
         self.n_hidden = n_hidden
         self.n_classes = n_classes
+        dims = [n_inputs] + n_hidden + [n_classes]
+        layers = len(dims) - 1
 
-        all = [n_inputs] + n_hidden + [n_classes]
-        self.modules, self.acts = [[]] * (len(n_hidden) + 1)
-        i = 0
-        self.depth = len(all) - 1
-        while i < self.depth:
-            if i == 0:
-                self.modules[i] = LinearModule(
-                    in_features=all[i], out_features=all[i + 1], input_layer=True
+        self.modules = []
+
+        self.modules.append(
+            LinearModule(in_features=dims[0], out_features=dims[1], input_layer=True)
+        )
+        for i in np.arange(1, layers):
+            self.modules.append(ReLUModule())
+            self.modules.append(
+                LinearModule(
+                    in_features=dims[i], out_features=dims[i + 1], input_layer=False
                 )
-                # self.acts[i] =
-            else:
-                self.modules[i] = LinearModule(
-                    in_features=all[i], out_features=all[i + 1]
-                )
-            i += 2
+            )
+        self.modules.append(SoftMaxModule())
 
         #######################
         # END OF YOUR CODE    #
@@ -94,6 +94,12 @@ class MLP(object):
         # PUT YOUR CODE HERE  #
         #######################
 
+        x = x.reshape((x.shape[0], -1))
+        print(x.shape)
+        for i in self.modules:
+            x = i.forward(x)
+        out = x
+
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -114,7 +120,10 @@ class MLP(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+
+        for i in reversed(self.modules):
+            dout = i.backward(dout)
+
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -131,7 +140,56 @@ class MLP(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+
+        for i in self.modules:
+            i.clear_cache()
+
         #######################
         # END OF YOUR CODE    #
         #######################
+
+
+if __name__ == "__main__":
+    # Command line arguments
+    import argparse
+
+    parser = argparse.ArgumentParser()
+
+    # Model hyperparameters
+    parser.add_argument(
+        "--hidden_dims",
+        default=[128],
+        type=int,
+        nargs="+",
+        help='Hidden dimensionalities to use inside the network. To specify multiple, use " " to separate them. Example: "256 128"',
+    )
+
+    # Optimizer hyperparameters
+    parser.add_argument("--lr", default=0.1, type=float, help="Learning rate to use")
+    parser.add_argument("--batch_size", default=128, type=int, help="Minibatch size")
+
+    # Other hyperparameters
+    parser.add_argument("--epochs", default=10, type=int, help="Max number of epochs")
+    parser.add_argument(
+        "--seed", default=42, type=int, help="Seed to use for reproducing results"
+    )
+    parser.add_argument(
+        "--data_dir",
+        default="data/",
+        type=str,
+        help="Data directory where to store/find the CIFAR10 dataset.",
+    )
+
+    args = parser.parse_args()
+    kwargs = vars(args)
+
+    x = MLP(3 * 1024, [100, 64], 10)
+    y = np.random.rand(128, 3, 32, 32)
+    print(x.forward(y).shape)
+    loss = np.random.rand(128, 10)
+    x.backward(loss)
+    print(x.modules[0].grads["bias"].shape)
+    print(x.modules[0].params["bias"].shape)
+    print(x.modules[2].grads["bias"].shape)
+    print(x.modules[2].params["bias"].shape)
+

@@ -119,7 +119,7 @@ class LinearModule(object):
         #######################
 
         self.grads["weight"] = np.einsum("ji, jk->ik", dout, self.x)
-        self.grads["bias"] = np.sum(dout, axis=1)
+        self.grads["bias"] = np.sum(dout, axis=0)
         dx = np.einsum("ij,jk->ik", dout, self.params["weight"])
 
         #######################
