@@ -48,21 +48,22 @@ class LinearModule(object):
 
         # initialize weights
         if input_layer == True:
-            var_factor = 2 / in_features
+            var = 2 / in_features
         else:
-            var_factor = np.sqrt(2 / in_features)
+            var = np.sqrt(2 / in_features)
 
-        self.weight = np.random.multivariate_normal(
-            mean=0,
-            cov=np.identity(out_features * in_features) * var_factor,
-            size=(out_features, in_features),
-        )
-
-        # initialize bias
-        self.bias = np.zeros(out_features)
+        self.params = {
+            "weight": np.random.normal(
+                loc=0, scale=var, size=(out_features, in_features),
+            ),
+            "bias": np.zeros(out_features),
+        }
 
         # initialize gradients with zeros
-        self.grads = {"weight": np.zeros(self.w.shape), "bias": np.zeros(self.b.shape)}
+        self.grads = {
+            "weight": np.zeros(self.params["weight"].shape),
+            "bias": np.zeros(self.params["bias"].shape),
+        }
 
         #######################
         # END OF YOUR CODE    #
@@ -87,7 +88,10 @@ class LinearModule(object):
         # PUT YOUR CODE HERE  #
         #######################
 
-        out = np.eimsum("ij, kj -> ik", x, self.weight) + self.bias[np.newaxis, :]
+        out = (
+            np.einsum("ij, kj -> ik", x, self.params["weight"])
+            + self.params["bias"][np.newaxis, :]
+        )
         self.x = x
 
         #######################
@@ -115,8 +119,8 @@ class LinearModule(object):
         #######################
 
         self.grads["weight"] = np.einsum("ji, jk->ik", dout, self.x)
-        self.grads["bias"] = np.sum(dout, axis=0)
-        dx = self.grads
+        self.grads["bias"] = np.sum(dout, axis=1)
+        dx = np.einsum("ij,jk->ik", dout, self.params["weight"])
 
         #######################
         # END OF YOUR CODE    #
@@ -134,8 +138,8 @@ class LinearModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        del self.x
-        del self.grads
+        self.x = None
+        self.grads = None
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -209,7 +213,7 @@ class ReLUModule(object):
         # PUT YOUR CODE HERE  #
         #######################
 
-        del self.out
+        self.out = None
 
         #######################
         # END OF YOUR CODE    #
@@ -241,9 +245,8 @@ class SoftMaxModule(object):
         #######################
 
         a = np.max(x, axis=-1)
-        x_new = x - a[np.newaxis, :]
-        print(x_new.shape)
-        out = np.exp(x_new) / np.sum(np.exp(x_new), axis=-1)
+        x_new = x - a[:, np.newaxis]
+        out = np.exp(x_new) / np.sum(np.exp(x_new), axis=-1)[:, np.newaxis]
         self.out = out
 
         #######################
@@ -288,7 +291,7 @@ class SoftMaxModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        del self.out
+        self.out = None
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -316,10 +319,10 @@ class CrossEntropyModule(object):
         # PUT YOUR CODE HERE  #
         #######################
         logged = np.log(x)
-        onehot = np.zeros(y.size, 10)
+        onehot = np.zeros((y.size, x.shape[1]))
         onehot[np.arange(y.size), y] = 1
 
-        out = (1 / (x.shape[0])) * (-1 * (logged @ onehot.T))
+        out = (1 / (x.shape[0])) * np.sum(-(logged * onehot))
 
         #######################
         # END OF YOUR CODE    #
@@ -344,10 +347,10 @@ class CrossEntropyModule(object):
         # PUT YOUR CODE HERE  #
         #######################
 
-        onehot = np.zeros(y.size, 10)
+        onehot = np.zeros((y.size, x.shape[1]))
         onehot[np.arange(y.size), y] = 1
         assert onehot.shape == x.shape
-        dx = (-1 / x.shape[0]) * (onehot / x)
+        dx = (-1 / x.shape[0]) * np.divide(onehot, x)
 
         #######################
         # END OF YOUR CODE    #
@@ -355,8 +358,3 @@ class CrossEntropyModule(object):
 
         return dx
 
-
-if __name__ == "__main__":
-    # Create random data for training the network
-    # TODO: do some random tests to make sure stuff is working
-    pass
