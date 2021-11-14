@@ -59,7 +59,7 @@ def accuracy(predictions, targets):
     #######################
     # END OF YOUR CODE    #
     #######################
-    
+
     return accuracy
 
 
@@ -87,7 +87,7 @@ def evaluate_model(model, data_loader):
     #######################
     # END OF YOUR CODE    #
     #######################
-    
+
     return avg_accuracy
 
 
@@ -134,21 +134,38 @@ def train(hidden_dims, lr, use_batch_norm, batch_size, epochs, seed, data_dir):
         torch.backends.cudnn.benchmark = False
 
     # Set default device
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Loading the dataset
     cifar10 = cifar10_utils.get_cifar10(data_dir)
-    cifar10_loader = cifar10_utils.get_dataloader(cifar10, batch_size=batch_size,
-                                                  return_numpy=False)
+    cifar10_loader = cifar10_utils.get_dataloader(
+        cifar10, batch_size=batch_size, return_numpy=False
+    )
 
     #######################
     # PUT YOUR CODE HERE  #
     #######################
 
+    batch_shape = np.array((next(iter(cifar10_loader["train"]))[0]).shape)
+    dims = batch_shape[1:].prod()
+    class_num = 10
+
     # TODO: Initialize model and loss module
-    model = ...
-    loss_module = ...
+    model = MLP(dims, hidden_dims, class_num, use_batch_norm)
+    model.to(device)
+    loss_module = nn.CrossEntropyLoss()
+    # need optimizer
     # TODO: Training loop including validation
+    n_batches_train = len(cifar10_loader["train"])
+    n_batches_val = len(cifar10_loader["validation"])
+
+    for epoch in range(num_epochs):
+        model.train()
+        print("Training epoch:", epoch + 1)
+        for data, targets in tqdm(cifar10_loader["train"], unit="batch"):
+            data = data.to(device)
+            targets = targets.to(device)
+
     # TODO: Do optimization with the simple SGD optimizer
     val_accuracies = ...
     # TODO: Test best model
@@ -162,33 +179,43 @@ def train(hidden_dims, lr, use_batch_norm, batch_size, epochs, seed, data_dir):
     return model, val_accuracies, test_accuracy, logging_info
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Command line arguments
     parser = argparse.ArgumentParser()
-    
+
     # Model hyperparameters
-    parser.add_argument('--hidden_dims', default=[128], type=int, nargs='+',
-                        help='Hidden dimensionalities to use inside the network. To specify multiple, use " " to separate them. Example: "256 128"')
-    parser.add_argument('--use_batch_norm', action='store_true',
-                        help='Use this option to add Batch Normalization layers to the MLP.')
-    
+    parser.add_argument(
+        "--hidden_dims",
+        default=[128],
+        type=int,
+        nargs="+",
+        help='Hidden dimensionalities to use inside the network. To specify multiple, use " " to separate them. Example: "256 128"',
+    )
+    parser.add_argument(
+        "--use_batch_norm",
+        action="store_true",
+        help="Use this option to add Batch Normalization layers to the MLP.",
+    )
+
     # Optimizer hyperparameters
-    parser.add_argument('--lr', default=0.1, type=float,
-                        help='Learning rate to use')
-    parser.add_argument('--batch_size', default=128, type=int,
-                        help='Minibatch size')
+    parser.add_argument("--lr", default=0.1, type=float, help="Learning rate to use")
+    parser.add_argument("--batch_size", default=128, type=int, help="Minibatch size")
 
     # Other hyperparameters
-    parser.add_argument('--epochs', default=10, type=int,
-                        help='Max number of epochs')
-    parser.add_argument('--seed', default=42, type=int,
-                        help='Seed to use for reproducing results')
-    parser.add_argument('--data_dir', default='data/', type=str,
-                        help='Data directory where to store/find the CIFAR10 dataset.')
+    parser.add_argument("--epochs", default=10, type=int, help="Max number of epochs")
+    parser.add_argument(
+        "--seed", default=42, type=int, help="Seed to use for reproducing results"
+    )
+    parser.add_argument(
+        "--data_dir",
+        default="data/",
+        type=str,
+        help="Data directory where to store/find the CIFAR10 dataset.",
+    )
 
     args = parser.parse_args()
     kwargs = vars(args)
 
     train(**kwargs)
     # Feel free to add any additional functions, such as plotting of the loss curve here
-    
+

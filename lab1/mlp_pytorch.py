@@ -59,7 +59,28 @@ class MLP(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        super().__init__()
+        self.flatten = nn.Flatten()
+        self.act = nn.ReLU()
+
+        modules = [self.flatten]
+        dims = [n_inputs] + n_hidden + [n_classes]
+
+        for i in range(0, len(dims) - 2):
+            modules += [nn.Linear(in_features=dims[i], out_features=dims[i + 1])]
+            if use_batch_norm == True:
+                modules += [nn.BatchNorm1d(num_features=dims[i + 1])]
+            modules += [self.act]
+        modules += [nn.Linear(in_features=dims[-2], out_features=dims[-1])]
+
+        self.layers = nn.Sequential(*modules)
+        self.info = {
+            "act": self.act.__class__.__name__,
+            "num_inputs": n_inputs,
+            "num_classes": n_classes,
+            "hidden_layers": n_hidden,
+        }
+
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -81,6 +102,7 @@ class MLP(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
+        out = self.layers(x)
 
         #######################
         # END OF YOUR CODE    #
@@ -94,4 +116,3 @@ class MLP(nn.Module):
         Returns the device on which the model is. Can be useful in some situations.
         """
         return next(self.parameters()).device
-    

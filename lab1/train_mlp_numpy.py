@@ -170,7 +170,7 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
 
             # calculate loss and accuracy
             loss_batch = loss_module.forward(out, targets)
-            train_loss[epoch] += loss_batch / n_batches_train
+            train_loss[epoch] += loss_batch
             batch_accuracy = accuracy(out, targets)
             train_accuracies[epoch] += batch_accuracy
 
@@ -181,16 +181,19 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
                 module.params["weight"] -= lr * module.grads["weight"]
                 module.params["bias"] -= lr * module.grads["bias"]
 
+        # average accuracy and loss over batches
         train_accuracies[epoch] = train_accuracies[epoch] / n_batches_train
+        train_loss[epoch] = train_loss[epoch] / n_batches_train
 
         print("Validation of epoch", epoch + 1)
         for data, targets in tqdm(cifar10_loader["validation"], unit="batch"):
             out = model.forward(data)
             loss_batchv = loss_module.forward(out, targets)
-            val_loss[epoch] += loss_batchv / n_batches_val
+            val_loss[epoch] += loss_batchv
             val_accuracies[epoch] += accuracy(out, targets)
 
         val_accuracies[epoch] = val_accuracies[epoch] / n_batches_val
+        val_loss[epoch] = val_loss[epoch] / n_batches_val
 
         if val_accuracies[epoch] > best_accuracy:
             print(
@@ -204,6 +207,7 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
     # TODO: Test best model
     print("Testing model...")
     test_accuracy = evaluate_model(best_model, cifar10_loader["test"])
+    print("Best model accuracy:", test_accuracy)
 
     # TODO: Add any information you might want to save for plotting
     logging_dict = {
@@ -214,7 +218,7 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
     #######################
     # END OF YOUR CODE    #
     #######################
-    print(val_accuracies, test_accuracy, logging_dict)
+    print(val_accuracies, logging_dict)
 
     return model, val_accuracies, test_accuracy, logging_dict
 
