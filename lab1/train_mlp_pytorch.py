@@ -55,6 +55,8 @@ def accuracy(predictions, targets):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
+    predicted_labels = torch.argmax(predictions, dim=-1)
+    accuracy = torch.mean((predicted_labels == targets).float())
 
     #######################
     # END OF YOUR CODE    #
@@ -83,6 +85,14 @@ def evaluate_model(model, data_loader):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
+
+    accuracy_sum = 0
+    for data, targets in data_loader:
+        scores = model.forward(data)
+        batch_accuracy = accuracy(scores, targets)
+        accuracy_sum += batch_accuracy
+
+    avg_accuracy = accuracy_sum / len(data_loader)
 
     #######################
     # END OF YOUR CODE    #
@@ -154,27 +164,86 @@ def train(hidden_dims, lr, use_batch_norm, batch_size, epochs, seed, data_dir):
     model = MLP(dims, hidden_dims, class_num, use_batch_norm)
     model.to(device)
     loss_module = nn.CrossEntropyLoss()
-    # need optimizer
+    optimizer = optim.SGD(model.parameters(), lr=lr)
     # TODO: Training loop including validation
     n_batches_train = len(cifar10_loader["train"])
     n_batches_val = len(cifar10_loader["validation"])
 
-    for epoch in range(num_epochs):
+    train_loss = torch.zeros(epochs)
+    train_accuracies = torch.zeros(epochs)
+    val_loss = torch.zeros(epochs)
+    val_accuracies = torch.zeros(epochs)
+
+    best_accuracy = 0
+
+    for epoch in range(epochs):
         model.train()
         print("Training epoch:", epoch + 1)
         for data, targets in tqdm(cifar10_loader["train"], unit="batch"):
+            # move to cuda if available
             data = data.to(device)
             targets = targets.to(device)
 
-    # TODO: Do optimization with the simple SGD optimizer
-    val_accuracies = ...
+            # run forward
+            out = model(data)
+            out = out.squeeze(dim=1)
+
+            # store losses and accuracies
+            loss_batch = loss_module(out, targets)
+            train_loss[epoch] += loss_batch
+            train_accuracies[epoch] += accuracy(out, targets)
+
+            # run backwards and update params
+            optimizer.zero_grad()
+            loss_batch.backward()
+            optimizer.step()
+
+        # average accuracy and loss over batches
+        train_accuracies[epoch] = train_accuracies[epoch] / n_batches_train
+        train_loss[epoch] = train_loss[epoch] / n_batches_train
+
+        model.eval()
+        print("Validation of epoch", epoch + 1)
+        for data, targets in tqdm(cifar10_loader["validation"], unit="batch"):
+            # move to cuda if available
+            data = data.to(device)
+            targets = targets.to(device)
+
+            # run forward
+            out = model(data)
+            out = out.squeeze(dim=1)
+
+            # store losses and accuracies
+            loss_batch = loss_module(out, targets)
+            val_loss[epoch] += loss_batch
+            val_accuracies[epoch] += accuracy(out, targets)
+
+        # average accuracy and loss over batches
+        val_accuracies[epoch] = val_accuracies[epoch] / n_batches_val
+        val_loss[epoch] = val_loss[epoch] / n_batches_val
+
+        if val_accuracies[epoch] > best_accuracy:
+            print(
+                "New best model found, copying it, new best accuracy is",
+                val_accuracies[epoch],
+            )
+            best_model = deepcopy(model)
+            best_accuracy = val_accuracies[epoch]
+
     # TODO: Test best model
-    test_accuracy = ...
+    print("Testing model...")
+    test_accuracy = evaluate_model(best_model, cifar10_loader["test"])
+    print("Best model accuracy:", test_accuracy)
     # TODO: Add any information you might want to save for plotting
-    logging_info = ...
+    logging_info = {
+        "train_loss": train_loss,
+        "val_loss": val_loss,
+        "train_acc": train_accuracies,
+    }
     #######################
     # END OF YOUR CODE    #
     #######################
+    print(logging_info)
 
     return model, val_accuracies, test_accuracy, logging_info
 
