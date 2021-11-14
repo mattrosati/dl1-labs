@@ -214,6 +214,7 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
     #######################
     # END OF YOUR CODE    #
     #######################
+    print(val_accuracies, test_accuracy, logging_dict)
 
     return model, val_accuracies, test_accuracy, logging_dict
 

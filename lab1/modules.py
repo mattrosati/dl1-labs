@@ -48,7 +48,7 @@ class LinearModule(object):
 
         # initialize weights
         if input_layer == True:
-            var = 2 / in_features
+            var = 1 / np.sqrt(in_features)
         else:
             var = np.sqrt(2 / in_features)
 
