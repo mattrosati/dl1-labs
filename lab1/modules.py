@@ -88,10 +88,7 @@ class LinearModule(object):
         # PUT YOUR CODE HERE  #
         #######################
 
-        out = (
-            np.einsum("ij, kj -> ik", x, self.params["weight"])
-            + self.params["bias"][np.newaxis, :]
-        )
+        out = x @ self.params["weight"].T + self.params["bias"][np.newaxis, :]
         self.x = x
 
         #######################
@@ -118,9 +115,9 @@ class LinearModule(object):
         # PUT YOUR CODE HERE  #
         #######################
 
-        self.grads["weight"] = np.einsum("ji, jk->ik", dout, self.x)
+        self.grads["weight"] = dout.T @ self.x
         self.grads["bias"] = np.sum(dout, axis=0)
-        dx = np.einsum("ij,jk->ik", dout, self.params["weight"])
+        dx = dout @ self.params["weight"]
 
         #######################
         # END OF YOUR CODE    #
@@ -269,9 +266,9 @@ class SoftMaxModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        ydy = np.einsum("...i,...i->...i", dout, self.out)
+        ydy = dout * self.out
         a = dout - np.sum(ydy, axis=-1, keepdims=True)
-        dx = np.einsum("...i,...i->...i", self.out, a)
+        dx = self.out * a
 
         #######################
         # END OF YOUR CODE    #

@@ -202,6 +202,7 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
             best_accuracy = val_accuracies[epoch]
 
     # TODO: Test best model
+    print("Testing model...")
     test_accuracy = evaluate_model(best_model, cifar10_loader["test"])
 
     # TODO: Add any information you might want to save for plotting
@@ -209,13 +210,10 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
         "train_loss": train_loss,
         "val_loss": val_loss,
         "train_acc": train_accuracies,
-        "val_acc": val_accuracies,
-        "test_acc": test_accuracy,
     }
     #######################
     # END OF YOUR CODE    #
     #######################
-    print(logging_dict)
 
     return model, val_accuracies, test_accuracy, logging_dict
 
