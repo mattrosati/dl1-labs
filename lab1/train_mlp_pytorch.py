@@ -32,6 +32,7 @@ import cifar10_utils
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import matplotlib.pyplot as plt
 
 
 def accuracy(predictions, targets):
@@ -56,7 +57,7 @@ def accuracy(predictions, targets):
     # PUT YOUR CODE HERE  #
     #######################
     predicted_labels = torch.argmax(predictions, dim=-1)
-    accuracy = torch.mean((predicted_labels == targets).float())
+    accuracy = torch.mean((predicted_labels == targets).float()).item()
 
     #######################
     # END OF YOUR CODE    #
@@ -161,23 +162,23 @@ def train(hidden_dims, lr, use_batch_norm, batch_size, epochs, seed, data_dir):
     class_num = 10
 
     # TODO: Initialize model and loss module
-    model = MLP(dims, hidden_dims, class_num, use_batch_norm)
-    model.to(device)
+    model_temp = MLP(dims, hidden_dims, class_num, use_batch_norm)
+    model_temp.to(device)
     loss_module = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=lr)
+    optimizer = optim.SGD(model_temp.parameters(), lr=lr)
     # TODO: Training loop including validation
     n_batches_train = len(cifar10_loader["train"])
     n_batches_val = len(cifar10_loader["validation"])
 
-    train_loss = torch.zeros(epochs)
-    train_accuracies = torch.zeros(epochs)
-    val_loss = torch.zeros(epochs)
-    val_accuracies = torch.zeros(epochs)
+    train_loss = np.zeros(epochs)
+    train_accuracies = np.zeros(epochs)
+    val_loss = np.zeros(epochs)
+    val_accuracies = np.zeros(epochs)
 
     best_accuracy = 0
 
     for epoch in range(epochs):
-        model.train()
+        model_temp.train()
         print("Training epoch:", epoch + 1)
         for data, targets in tqdm(cifar10_loader["train"], unit="batch"):
             # move to cuda if available
@@ -185,12 +186,12 @@ def train(hidden_dims, lr, use_batch_norm, batch_size, epochs, seed, data_dir):
             targets = targets.to(device)
 
             # run forward
-            out = model(data)
+            out = model_temp(data)
             out = out.squeeze(dim=1)
 
             # store losses and accuracies
             loss_batch = loss_module(out, targets)
-            train_loss[epoch] += loss_batch
+            train_loss[epoch] += loss_batch.item()
             train_accuracies[epoch] += accuracy(out, targets)
 
             # run backwards and update params
@@ -202,7 +203,7 @@ def train(hidden_dims, lr, use_batch_norm, batch_size, epochs, seed, data_dir):
         train_accuracies[epoch] = train_accuracies[epoch] / n_batches_train
         train_loss[epoch] = train_loss[epoch] / n_batches_train
 
-        model.eval()
+        model_temp.eval()
         print("Validation of epoch", epoch + 1)
         for data, targets in tqdm(cifar10_loader["validation"], unit="batch"):
             # move to cuda if available
@@ -210,12 +211,12 @@ def train(hidden_dims, lr, use_batch_norm, batch_size, epochs, seed, data_dir):
             targets = targets.to(device)
 
             # run forward
-            out = model(data)
+            out = model_temp(data)
             out = out.squeeze(dim=1)
 
             # store losses and accuracies
             loss_batch = loss_module(out, targets)
-            val_loss[epoch] += loss_batch
+            val_loss[epoch] += loss_batch.item()
             val_accuracies[epoch] += accuracy(out, targets)
 
         # average accuracy and loss over batches
@@ -227,7 +228,7 @@ def train(hidden_dims, lr, use_batch_norm, batch_size, epochs, seed, data_dir):
                 "New best model found, copying it, new best accuracy is",
                 val_accuracies[epoch],
             )
-            best_model = deepcopy(model)
+            best_model = deepcopy(model_temp)
             best_accuracy = val_accuracies[epoch]
 
     # TODO: Test best model
@@ -239,11 +240,12 @@ def train(hidden_dims, lr, use_batch_norm, batch_size, epochs, seed, data_dir):
         "train_loss": train_loss,
         "val_loss": val_loss,
         "train_acc": train_accuracies,
+        "epochs": np.arange(1, epochs + 1),
     }
+    model = best_model
     #######################
     # END OF YOUR CODE    #
     #######################
-    print(logging_info)
 
     return model, val_accuracies, test_accuracy, logging_info
 
@@ -285,6 +287,24 @@ if __name__ == "__main__":
     args = parser.parse_args()
     kwargs = vars(args)
 
-    train(**kwargs)
+    model, val_accuracies, test_accuracy, logging_dict = train(**kwargs)
     # Feel free to add any additional functions, such as plotting of the loss curve here
+
+    f, (ax1, ax2) = plt.subplots(1, 2)
+    ax1.plot(logging_dict["epochs"], logging_dict["train_loss"], "b-", label="Training")
+    ax1.plot(logging_dict["epochs"], logging_dict["val_loss"], "r-", label="Validation")
+    ax1.set_title("Loss Values per Epoch")
+    ax1.set_ylabel("Loss")
+    ax1.set_xlabel("Epochs")
+    ax1.legend()
+
+    ax2.plot(logging_dict["epochs"], logging_dict["train_acc"], "b-", label="Training")
+    ax2.plot(logging_dict["epochs"], val_accuracies, "r-", label="Validation")
+    ax2.set_title("Accuracies per Epoch")
+    ax2.set_ylabel("Accuracy")
+    ax2.set_xlabel("Epochs")
+    ax2.legend()
+
+    f.suptitle("Pytorch MLP Implementation Results")
+    plt.show()
 

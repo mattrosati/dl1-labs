@@ -31,6 +31,7 @@ from modules import CrossEntropyModule
 import cifar10_utils
 
 import torch
+import matplotlib.pyplot as plt
 
 
 def accuracy(predictions, targets):
@@ -149,7 +150,7 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
     class_num = 10
 
     # TODO: Initialize model and loss module
-    model = MLP(dims, hidden_dims, class_num)
+    model_temp = MLP(dims, hidden_dims, class_num)
     loss_module = CrossEntropyModule()
 
     # TODO: Training loop including validation
@@ -166,7 +167,7 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
         print("Training epoch:", epoch + 1)
         for data, targets in tqdm(cifar10_loader["train"], unit="batch"):
             # run forward
-            out = model.forward(data)
+            out = model_temp.forward(data)
 
             # calculate loss and accuracy
             loss_batch = loss_module.forward(out, targets)
@@ -176,8 +177,8 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
 
             # run backward and update weights
             loss_back = loss_module.backward(out, targets)
-            model.backward(loss_back)
-            for module in model.modules[::2]:
+            model_temp.backward(loss_back)
+            for module in model_temp.modules[::2]:
                 module.params["weight"] -= lr * module.grads["weight"]
                 module.params["bias"] -= lr * module.grads["bias"]
 
@@ -187,7 +188,7 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
 
         print("Validation of epoch", epoch + 1)
         for data, targets in tqdm(cifar10_loader["validation"], unit="batch"):
-            out = model.forward(data)
+            out = model_temp.forward(data)
             loss_batchv = loss_module.forward(out, targets)
             val_loss[epoch] += loss_batchv
             val_accuracies[epoch] += accuracy(out, targets)
@@ -200,25 +201,26 @@ def train(hidden_dims, lr, batch_size, epochs, seed, data_dir):
                 "New best model found, copying it, new best accuracy is",
                 val_accuracies[epoch],
             )
-            model.clear_cache()
-            best_model = deepcopy(model)
+            model_temp.clear_cache()
+            best_model = deepcopy(model_temp)
             best_accuracy = val_accuracies[epoch]
 
     # TODO: Test best model
     print("Testing model...")
     test_accuracy = evaluate_model(best_model, cifar10_loader["test"])
-    print("Best model accuracy:", test_accuracy)
+    print("Best model accuracy on test set:", test_accuracy)
 
     # TODO: Add any information you might want to save for plotting
     logging_dict = {
         "train_loss": train_loss,
         "val_loss": val_loss,
         "train_acc": train_accuracies,
+        "epochs": np.arange(1, epochs + 1),
     }
+    model = best_model
     #######################
     # END OF YOUR CODE    #
     #######################
-    print(val_accuracies, logging_dict)
 
     return model, val_accuracies, test_accuracy, logging_dict
 
@@ -255,6 +257,24 @@ if __name__ == "__main__":
     args = parser.parse_args()
     kwargs = vars(args)
 
-    train(**kwargs)
+    model, val_accuracies, test_accuracy, logging_dict = train(**kwargs)
     # Feel free to add any additional functions, such as plotting of the loss curve here
+
+    f, (ax1, ax2) = plt.subplots(1, 2)
+    ax1.plot(logging_dict["epochs"], logging_dict["train_loss"], "b-", label="Training")
+    ax1.plot(logging_dict["epochs"], logging_dict["val_loss"], "r-", label="Validation")
+    ax1.set_title("Loss Values per Epoch")
+    ax1.set_ylabel("Loss")
+    ax1.set_xlabel("Epochs")
+    ax1.legend()
+
+    ax2.plot(logging_dict["epochs"], logging_dict["train_acc"], "b-", label="Training")
+    ax2.plot(logging_dict["epochs"], val_accuracies, "r-", label="Validation")
+    ax2.set_title("Accuracies per Epoch")
+    ax2.set_ylabel("Accuracy")
+    ax2.set_xlabel("Epochs")
+    ax2.legend()
+
+    f.suptitle("Numpy MLP Implementation Results")
+    plt.show()
 

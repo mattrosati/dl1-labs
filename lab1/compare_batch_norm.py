@@ -26,10 +26,12 @@ import os
 from mlp_pytorch import MLP
 import cifar10_utils
 import train_mlp_pytorch
+import pickle
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
+
 # Hint: you might want to import some plotting libraries or similar
 # You are also allowed to use libraries here which are not in the provided environment.
 
@@ -81,9 +83,9 @@ def plot_results(results_filename):
     #######################
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Feel free to change the code below as you need it.
-    FILENAME = 'results.txt' 
+    FILENAME = "results.txt"
     if not os.path.isfile(FILENAME):
         train_models(FILENAME)
     plot_results(FILENAME)
