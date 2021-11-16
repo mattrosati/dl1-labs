@@ -314,7 +314,8 @@ class CrossEntropyModule(object):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        logged = np.log(x)
+        eps = np.finfo(float).eps
+        logged = np.log(x + eps)
         onehot = np.zeros((y.size, x.shape[1]))
         onehot[np.arange(y.size), y] = 1
 

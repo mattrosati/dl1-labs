@@ -155,6 +155,8 @@ def plot_results(results_filename):
     # f.tight_layout(pad=0.2)
     plt.show()
 
+    print([i["test_acc"] for i in data])
+
     #######################
     # END OF YOUR CODE    #
     #######################
