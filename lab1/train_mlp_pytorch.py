@@ -158,7 +158,6 @@ def train(hidden_dims, lr, use_batch_norm, batch_size, epochs, seed, data_dir):
     #######################
 
     batch_shape = np.array((next(iter(cifar10_loader["train"]))[0]).shape)
-    print(cifar10_loader["train"].dataset.labels)
     dims = batch_shape[1:].prod()
     class_num = 10
 
