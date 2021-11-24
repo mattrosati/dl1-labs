@@ -131,5 +131,7 @@ dmypy.json
 # DS_Store
 .DS_Store
 
-# Assignment 1 dataset
-assignment_1/data/
+# Datasets
+assignment1/data/
+assignment2/part2/assets/
+
