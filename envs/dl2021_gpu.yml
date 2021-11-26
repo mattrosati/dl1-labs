@@ -1,4 +1,4 @@
-name: dl2021
+name: dl1_gpu
 channels:
   - pytorch
   - conda-forge
