@@ -134,6 +134,7 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
     scheduler = torch.optim.lr_scheduler.MultiStepLR(
         optimizer, milestones=[90, 135], gamma=0.1
     )
+    loss_module = nn.CrossEntropyLoss()
 
     # Training loop with validation after each epoch. Save the best model, and remember to use the lr scheduler.
     pass
@@ -230,7 +231,11 @@ def main(model_name, lr, batch_size, epochs, data_dir, seed):
         torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
     )
     set_seed(seed)
-    pass
+
+    if os.path.isfile(model_name)
+
+    model.to(device)
+
     #######################
     # END OF YOUR CODE    #
     #######################
