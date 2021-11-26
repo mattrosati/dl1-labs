@@ -32,7 +32,12 @@ import torchvision.models as models
 from torchvision.datasets import CIFAR10
 from torchvision import transforms
 
-from augmentations import gaussian_noise_transform, gaussian_blur_transform, contrast_transform, jpeg_transform
+from augmentations import (
+    gaussian_noise_transform,
+    gaussian_blur_transform,
+    contrast_transform,
+    jpeg_transform,
+)
 from cifar10_utils import get_train_validation_set, get_test_set
 
 
@@ -62,23 +67,20 @@ def get_model(model_name, num_classes=10):
     Returns:
         cnn_model: nn.Module object representing the model architecture.
     """
-    if model_name == 'debug':  # Use this model for debugging
-        cnn_model = nn.Sequential(
-                nn.Flatten(),
-                nn.Linear(32*32*3, num_classes)
-            )
-    elif model_name == 'vgg11':
+    if model_name == "debug":  # Use this model for debugging
+        cnn_model = nn.Sequential(nn.Flatten(), nn.Linear(32 * 32 * 3, num_classes))
+    elif model_name == "vgg11":
         cnn_model = models.vgg11(num_classes=num_classes)
-    elif model_name == 'vgg11_bn':
-            cnn_model = models.vgg11_bn(num_classes=num_classes)
-    elif model_name == 'resnet18':
+    elif model_name == "vgg11_bn":
+        cnn_model = models.vgg11_bn(num_classes=num_classes)
+    elif model_name == "resnet18":
         cnn_model = models.resnet18(num_classes=num_classes)
-    elif model_name == 'resnet34':
+    elif model_name == "resnet34":
         cnn_model = models.resnet34(num_classes=num_classes)
-    elif model_name == 'densenet121':
+    elif model_name == "densenet121":
         cnn_model = models.densenet121(num_classes=num_classes)
     else:
-        assert False, f'Unknown network architecture \"{model_name}\"'
+        assert False, f'Unknown network architecture "{model_name}"'
     return cnn_model
 
 
@@ -104,22 +106,41 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
     #######################
     # PUT YOUR CODE HERE  #
     #######################
-    
-    # Load the datasets
-    pass
 
-    # Initialize the optimizers and learning rate scheduler. 
+    # Load the datasets
+    train_set, val_set = get_train_validation_set(data_dir)
+    test_set = get_test_set(data_dir)
+
+    train_loader = data.DataLoader(
+        train_set,
+        batch_size=batch_size,
+        shuffle=True,
+        drop_last=True,
+        pin_memory=True,
+        num_workers=4,
+    )
+    val_loader = data.DataLoader(
+        val_set, batch_size=batch_size, shuffle=False, drop_last=False, num_workers=4
+    )
+    test_loader = data.DataLoader(
+        test_set, batch_size=batch_size, shuffle=False, drop_last=False, num_workers=4
+    )
+
+    # Initialize the optimizers and learning rate scheduler.
     # We provide a recommend setup, which you are allowed to change if interested.
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr,
-                                momentum=0.9, weight_decay=5e-4)
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[90, 135], gamma=0.1)
-    
+    optimizer = torch.optim.SGD(
+        model.parameters(), lr=lr, momentum=0.9, weight_decay=5e-4
+    )
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(
+        optimizer, milestones=[90, 135], gamma=0.1
+    )
+
     # Training loop with validation after each epoch. Save the best model, and remember to use the lr scheduler.
     pass
-    
+
     # Load best model and return it.
     pass
-    
+
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -205,7 +226,9 @@ def main(model_name, lr, batch_size, epochs, data_dir, seed):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
-    device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
+    device = (
+        torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
+    )
     set_seed(seed)
     pass
     #######################
@@ -213,10 +236,7 @@ def main(model_name, lr, batch_size, epochs, data_dir, seed):
     #######################
 
 
-
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     """
     The given hyperparameters below should give good results for all models.
     However, you are allowed to change the hyperparameters if you want.
@@ -224,24 +244,27 @@ if __name__ == '__main__':
     """
     # Command line arguments
     parser = argparse.ArgumentParser()
-    
+
     # Model hyperparameters
-    parser.add_argument('--model_name', default='debug', type=str,
-                        help='Name of the model to train.')
-    
+    parser.add_argument(
+        "--model_name", default="debug", type=str, help="Name of the model to train."
+    )
+
     # Optimizer hyperparameters
-    parser.add_argument('--lr', default=0.01, type=float,
-                        help='Learning rate to use')
-    parser.add_argument('--batch_size', default=128, type=int,
-                        help='Minibatch size')
+    parser.add_argument("--lr", default=0.01, type=float, help="Learning rate to use")
+    parser.add_argument("--batch_size", default=128, type=int, help="Minibatch size")
 
     # Other hyperparameters
-    parser.add_argument('--epochs', default=150, type=int,
-                        help='Max number of epochs')
-    parser.add_argument('--seed', default=42, type=int,
-                        help='Seed to use for reproducing results')
-    parser.add_argument('--data_dir', default='data/', type=str,
-                        help='Data directory where to store/find the CIFAR10 dataset.')
+    parser.add_argument("--epochs", default=150, type=int, help="Max number of epochs")
+    parser.add_argument(
+        "--seed", default=42, type=int, help="Seed to use for reproducing results"
+    )
+    parser.add_argument(
+        "--data_dir",
+        default="data/",
+        type=str,
+        help="Data directory where to store/find the CIFAR10 dataset.",
+    )
 
     args = parser.parse_args()
     kwargs = vars(args)
