@@ -21,6 +21,9 @@ import os
 import json
 import argparse
 import numpy as np
+from tqdm.auto import tqdm
+from torch.utils.tensorboard import SummaryWriter
+from copy import deepcopy
 
 import torch
 import torch.nn as nn
@@ -109,7 +112,6 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
 
     # Load the datasets
     train_set, val_set = get_train_validation_set(data_dir)
-    test_set = get_test_set(data_dir)
 
     train_loader = data.DataLoader(
         train_set,
@@ -121,9 +123,6 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
     )
     val_loader = data.DataLoader(
         val_set, batch_size=batch_size, shuffle=False, drop_last=False, num_workers=4
-    )
-    test_loader = data.DataLoader(
-        test_set, batch_size=batch_size, shuffle=False, drop_last=False, num_workers=4
     )
 
     # Initialize the optimizers and learning rate scheduler.
@@ -137,10 +136,80 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
     loss_module = nn.CrossEntropyLoss()
 
     # Training loop with validation after each epoch. Save the best model, and remember to use the lr scheduler.
-    pass
 
-    # Load best model and return it.
-    pass
+    # make logging dir
+    os.makedirs("logger/", exist_ok=True)
+    writer = SummaryWriter("logger/")
+    model_plotted = False
+
+    # start training
+    temp_model = model
+    temp_model.to(device)
+
+    train_epoch_loss = 0
+    val_epoch_loss = 0
+    best_accuracy = 0
+    temp_accuracy = 0
+    for i in tqdm(range(epochs), unit="epoch"):
+        for batch, targets in train_loader:
+            # move to cuda if available
+            batch.to(device)
+            targets.to(device)
+
+            if not model_plotted:
+                writer.add_graph(model, batch)
+                model_plotted = True
+
+            # run forward
+            out = temp_model(batch)
+            out = out.squeeze(dim=1)
+
+            # do loss calc and
+            loss_batch = loss_module(out, targets)
+            train_epoch_loss += loss_batch.item()
+
+            # run backwards and update params
+            optimizer.zero_grad()
+            loss_batch.backward()
+            optimizer.step()
+
+        scheduler.step()
+
+        # add loss to TensorBoard
+        train_epoch_loss /= len(train_loader)
+        writer.add_scalar("training_loss", train_epoch_loss, global_step=epochs + 1)
+
+        # change to validation mode
+        temp_model.eval()
+        for batch, targets in val_loader:
+            # move to cuda if available
+            batch = batch.to(device)
+            targets = targets.to(device)
+
+            # run forward
+            out = temp_model(batch)
+            out = out.squeeze(dim=1)
+
+            # store losses and accuracies
+            loss_batch = loss_module(out, targets)
+            val_epoch_loss += loss_batch.item()
+            temp_accuracy += accuracy(out, targets)
+
+        # average accuracy over batches
+        temp_accuracy /= len(val_loader)
+        writer.add_scalar("validation_loss", val_epoch_loss, global_step=epochs + 1)
+
+        # store best model
+        if temp_accuracy > best_accuracy:
+            model = deepcopy(temp_model.state_dict())
+            best_accuracy = temp_accuracy
+
+    # close tensor logger
+    writer.close()
+
+    # save best model
+    checkpoint_path = os.path.join("models", checkpoint_name + ".pth")
+    torch.save(model.state_dict(), checkpoint_path)
 
     #######################
     # END OF YOUR CODE    #
@@ -167,6 +236,7 @@ def evaluate_model(model, data_loader, device):
     # PUT YOUR CODE HERE  #
     #######################
     pass
+    accuracy = None
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -197,6 +267,11 @@ def test_model(model, batch_size, data_dir, device, seed):
     #######################
     set_seed(seed)
     test_results = {}
+
+    test_set = get_test_set(data_dir)
+    test_loader = data.DataLoader(
+        test_set, batch_size=batch_size, shuffle=False, drop_last=False, num_workers=4
+    )
     pass
     #######################
     # END OF YOUR CODE    #
@@ -232,9 +307,29 @@ def main(model_name, lr, batch_size, epochs, data_dir, seed):
     )
     set_seed(seed)
 
-    if os.path.isfile(model_name)
+    # load model class
+    model = get_model(model_name, num_classes=10)
 
-    model.to(device)
+    # load or initialize model dict, move to gpu if available
+    file_name = model_name + ".pth"
+    os.makedirs("models/", exist_ok=True)
+    model_path = os.path.join("models", file_name)
+    if os.path.isfile(model_path):
+        model.load_state_dict(torch.load(model_path))
+    else:
+        model = train_model(model, lr, batch_size, epochs, data_dir, model_name, device)
+
+    # evaluate model
+    results = test_model(model, batch_size, data_dir, device, seed)
+
+    # save model
+    os.makedirs("results/", exist_ok=True)
+    results_name = model_name + "_results.json"
+    results_path = os.path.join("results", results_name)
+    with open(results_path, "w") as fp:
+        json.dump(results, fp)
+
+    return
 
     #######################
     # END OF YOUR CODE    #
