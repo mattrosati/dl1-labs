@@ -192,7 +192,7 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
 
     # save best model
     checkpoint_path = os.path.join("models", checkpoint_name + ".pth")
-    torch.save(model.state_dict(), checkpoint_path)
+    torch.save(model, checkpoint_path)
 
     #######################
     # END OF YOUR CODE    #
