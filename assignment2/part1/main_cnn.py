@@ -119,10 +119,10 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
         shuffle=True,
         drop_last=True,
         pin_memory=True,
-        num_workers=4,
+        num_workers=0,
     )
     val_loader = data.DataLoader(
-        val_set, batch_size=batch_size, shuffle=False, drop_last=False, num_workers=4
+        val_set, batch_size=batch_size, shuffle=False, drop_last=False, num_workers=0
     )
 
     # Initialize the optimizers and learning rate scheduler.
@@ -137,21 +137,20 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
 
     # Training loop with validation after each epoch. Save the best model, and remember to use the lr scheduler.
 
-    # make logging dir
-    os.makedirs("logger/", exist_ok=True)
-    writer = SummaryWriter("logger/")
+    # init logger
+    writer = SummaryWriter("logger/" + checkpoint_name)
     model_plotted = False
 
     # start training
     temp_model = model
     temp_model.to(device)
 
-    train_epoch_loss = 0
-    val_epoch_loss = 0
     best_accuracy = 0
     temp_accuracy = 0
-    for i in tqdm(range(epochs), unit="epoch"):
-        for batch, targets in train_loader:
+    for i in range(epochs):
+        temp_model.train()
+        train_epoch_loss = 0
+        for batch, targets in tqdm(train_loader, unit="batch"):
             # move to cuda if available
             batch.to(device)
             targets.to(device)
@@ -177,27 +176,11 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
 
         # add loss to TensorBoard
         train_epoch_loss /= len(train_loader)
-        writer.add_scalar("training_loss", train_epoch_loss, global_step=epochs + 1)
+        writer.add_scalar("training_loss", train_epoch_loss, global_step=i + 1)
 
-        # change to validation mode
-        temp_model.eval()
-        for batch, targets in val_loader:
-            # move to cuda if available
-            batch = batch.to(device)
-            targets = targets.to(device)
-
-            # run forward
-            out = temp_model(batch)
-            out = out.squeeze(dim=1)
-
-            # store losses and accuracies
-            loss_batch = loss_module(out, targets)
-            val_epoch_loss += loss_batch.item()
-            temp_accuracy += accuracy(out, targets)
-
-        # average accuracy over batches
-        temp_accuracy /= len(val_loader)
-        writer.add_scalar("validation_loss", val_epoch_loss, global_step=epochs + 1)
+        # average accuracy over validation set
+        temp_accuracy = evaluate_model(temp_model, val_loader, device)
+        writer.add_scalar("validation_accuracy", temp_accuracy, global_step=i + 1)
 
         # store best model
         if temp_accuracy > best_accuracy:
@@ -235,8 +218,16 @@ def evaluate_model(model, data_loader, device):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
-    pass
-    accuracy = None
+    accuracy_sum = 0
+    model.eval()
+    for batch, targets in data_loader:
+        batch.to(device)
+        targets.to(device)
+        scores = model(batch)
+        batch_accuracy = (scores.argmax(dim=-1) == targets).float().mean().item()
+        accuracy_sum += batch_accuracy
+
+    accuracy = accuracy_sum / len(data_loader)
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -267,12 +258,47 @@ def test_model(model, batch_size, data_dir, device, seed):
     #######################
     set_seed(seed)
     test_results = {}
+    corruptions = ["clean", "gnoise", "gblur", "contrast", "jpg"]
 
-    test_set = get_test_set(data_dir)
-    test_loader = data.DataLoader(
-        test_set, batch_size=batch_size, shuffle=False, drop_last=False, num_workers=4
-    )
-    pass
+    # clean version
+    if isinstance(list(model.children())[0], nn.Linear):
+        print("doing debug")
+        test_set = get_test_set(data_dir)
+        test_loader = data.DataLoader(
+            test_set,
+            batch_size=batch_size,
+            shuffle=False,
+            drop_last=False,
+            num_workers=0,
+        )
+        test_results = evaluate_model(model, test_loader, device)
+        print(test_results)
+    else:
+        for c in corruptions:
+            if c == "clean":
+
+                test_results[c] = evaluate_model(model, test_loader, device)
+            else:
+                for i in range(1, 6):
+                    test_results[c] = []
+                    if c == "gnoise":
+                        augment = gaussian_noise_transform(severity=i)
+                    elif c == "gblur":
+                        augment = gaussian_blur_transform(severity=i)
+                    elif c == "contrast":
+                        augment = contrast_transform(severity=i)
+                    elif c == "jpg":
+                        augment = jpeg_transform(severity=i)
+                    test_set = get_test_set(data_dir, augmentation=augment)
+                    test_loader = data.DataLoader(
+                        test_set,
+                        batch_size=batch_size,
+                        shuffle=False,
+                        drop_last=False,
+                        num_workers=0,
+                    )
+                    test_results[c] += [evaluate_model(model, test_loader, device)]
+
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -322,7 +348,11 @@ def main(model_name, lr, batch_size, epochs, data_dir, seed):
     # evaluate model
     results = test_model(model, batch_size, data_dir, device, seed)
 
-    # save model
+    if model_name != "debug" or model_name != "resnet18":
+        # TODO: get CE and RCE and append to results
+        pass
+
+    # save model results
     os.makedirs("results/", exist_ok=True)
     results_name = model_name + "_results.json"
     results_path = os.path.join("results", results_name)
