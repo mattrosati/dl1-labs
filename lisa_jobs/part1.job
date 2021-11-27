@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#SBATCH --partition=gpu_shared_course
+#SBATCH --gres=gpu:1
+#SBATCH --job-name=dl_part1_all
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=3
+#SBATCH --time=10:00:00
+#SBATCH --mem=32000M
+#SBATCH --output=slurm_output_%A.out
+
+module purge
+module load 2021
+module load Anaconda3/2021.05
+
+cd $HOME/dl1-labs/assignment2/part1/
+source activate dl1
+rsync -a $HOME/dl1-labs/assignment2/part1/data/ $TMPDIR
+srun python -u main_cnn.py --model_name "resnet18" --data_dir "/scratch/"
+srun python -u main_cnn.py --model_name "vgg11" --data_dir "/scratch/"
+srun python -u main_cnn.py --model_name "vgg11_bn" --data_dir "/scratch/"
+srun python -u main_cnn.py --model_name "resnet34" --data_dir "/scratch/"
+srun python -u main_cnn.py --model_name "densenet121" --data_dir "/scratch/"
