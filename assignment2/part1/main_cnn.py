@@ -180,8 +180,6 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
         if temp_accuracy > best_accuracy:
             model = deepcopy(temp_model)
             best_accuracy = temp_accuracy
-    print("trained on", next(model.parameters()).is_cuda)
-    print("temp model on", next(temp_model.parameters()).is_cuda)
     # close tensor logger
     writer.close()
 
@@ -257,6 +255,7 @@ def test_model(model, batch_size, data_dir, device, seed):
 
     # loop through all corruptions and test
     for c in corruptions:
+        print("Testing with corruption:", c)
         if c == "clean":
             test_set = get_test_set(data_dir)
             test_loader = data.DataLoader(
@@ -270,6 +269,7 @@ def test_model(model, batch_size, data_dir, device, seed):
         else:
             test_results[c] = []
             for i in range(1, 6):
+                print("Severity:", i)
                 if c == "gnoise":
                     augment = gaussian_noise_transform(severity=i)
                 elif c == "gblur":
@@ -287,6 +287,7 @@ def test_model(model, batch_size, data_dir, device, seed):
                     pin_memory=True,
                 )
                 test_results[c] += [evaluate_model(model, test_loader, device)]
+            print("Done")
 
     #######################
     # END OF YOUR CODE    #
