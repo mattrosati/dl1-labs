@@ -213,6 +213,7 @@ def evaluate_model(model, data_loader, device):
     #######################
     accuracy_sum = 0
     model.eval()
+    next(model.parameters()).is_cuda
     for batch, targets in data_loader:
         batch = batch.to(device)
         targets = targets.to(device)
