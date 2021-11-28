@@ -114,15 +114,10 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
     train_set, val_set = get_train_validation_set(data_dir)
 
     train_loader = data.DataLoader(
-        train_set,
-        batch_size=batch_size,
-        shuffle=True,
-        drop_last=True,
-        pin_memory=True,
-        num_workers=0,
+        train_set, batch_size=batch_size, shuffle=True, drop_last=True, pin_memory=True,
     )
     val_loader = data.DataLoader(
-        val_set, batch_size=batch_size, shuffle=False, drop_last=False, num_workers=0
+        val_set, batch_size=batch_size, shuffle=False, drop_last=False, pin_memory=True
     )
 
     # Initialize the optimizers and learning rate scheduler.
@@ -142,18 +137,17 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
     model_plotted = False
 
     # start training
-    temp_model = model
-    temp_model.to(device)
+    temp_model = model.to(device)
 
     best_accuracy = 0
     temp_accuracy = 0
-    for i in range(epochs):
+    for i in tqdm(range(epochs), unit="epoch"):
         temp_model.train()
         train_epoch_loss = 0
-        for batch, targets in tqdm(train_loader, unit="batch"):
+        for batch, targets in train_loader:
             # move to cuda if available
-            batch.to(device)
-            targets.to(device)
+            batch = batch.to(device)
+            targets = targets.to(device)
 
             if not model_plotted:
                 writer.add_graph(model, batch)
@@ -184,15 +178,14 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
 
         # store best model
         if temp_accuracy > best_accuracy:
-            model = deepcopy(temp_model.state_dict())
+            model = deepcopy(temp_model)
             best_accuracy = temp_accuracy
-
     # close tensor logger
     writer.close()
 
     # save best model
     checkpoint_path = os.path.join("models", checkpoint_name + ".pth")
-    torch.save(model, checkpoint_path)
+    torch.save(model.state_dict(), checkpoint_path)
 
     #######################
     # END OF YOUR CODE    #
@@ -221,8 +214,8 @@ def evaluate_model(model, data_loader, device):
     accuracy_sum = 0
     model.eval()
     for batch, targets in data_loader:
-        batch.to(device)
-        targets.to(device)
+        batch = batch.to(device)
+        targets = targets.to(device)
         scores = model(batch)
         batch_accuracy = (scores.argmax(dim=-1) == targets).float().mean().item()
         accuracy_sum += batch_accuracy
@@ -260,44 +253,38 @@ def test_model(model, batch_size, data_dir, device, seed):
     test_results = {}
     corruptions = ["clean", "gnoise", "gblur", "contrast", "jpg"]
 
-    # clean version
-    if isinstance(list(model.children())[0], nn.Linear):
-        print("doing debug")
-        test_set = get_test_set(data_dir)
-        test_loader = data.DataLoader(
-            test_set,
-            batch_size=batch_size,
-            shuffle=False,
-            drop_last=False,
-            num_workers=0,
-        )
-        test_results = evaluate_model(model, test_loader, device)
-        print(test_results)
-    else:
-        for c in corruptions:
-            if c == "clean":
-
-                test_results[c] = evaluate_model(model, test_loader, device)
-            else:
-                for i in range(1, 6):
-                    test_results[c] = []
-                    if c == "gnoise":
-                        augment = gaussian_noise_transform(severity=i)
-                    elif c == "gblur":
-                        augment = gaussian_blur_transform(severity=i)
-                    elif c == "contrast":
-                        augment = contrast_transform(severity=i)
-                    elif c == "jpg":
-                        augment = jpeg_transform(severity=i)
-                    test_set = get_test_set(data_dir, augmentation=augment)
-                    test_loader = data.DataLoader(
-                        test_set,
-                        batch_size=batch_size,
-                        shuffle=False,
-                        drop_last=False,
-                        num_workers=0,
-                    )
-                    test_results[c] += [evaluate_model(model, test_loader, device)]
+    # loop through all corruptions and test
+    for c in corruptions:
+        if c == "clean":
+            test_set = get_test_set(data_dir)
+            test_loader = data.DataLoader(
+                test_set,
+                batch_size=batch_size,
+                shuffle=False,
+                drop_last=False,
+                pin_memory=True,
+            )
+            test_results[c] = evaluate_model(model, test_loader, device)
+        else:
+            test_results[c] = []
+            for i in range(1, 6):
+                if c == "gnoise":
+                    augment = gaussian_noise_transform(severity=i)
+                elif c == "gblur":
+                    augment = gaussian_blur_transform(severity=i)
+                elif c == "contrast":
+                    augment = contrast_transform(severity=i)
+                elif c == "jpg":
+                    augment = jpeg_transform(severity=i)
+                test_set = get_test_set(data_dir, augmentation=augment)
+                test_loader = data.DataLoader(
+                    test_set,
+                    batch_size=batch_size,
+                    shuffle=False,
+                    drop_last=False,
+                    pin_memory=True,
+                )
+                test_results[c] += [evaluate_model(model, test_loader, device)]
 
     #######################
     # END OF YOUR CODE    #
@@ -348,10 +335,6 @@ def main(model_name, lr, batch_size, epochs, data_dir, seed):
     # evaluate model
     results = test_model(model, batch_size, data_dir, device, seed)
 
-    if model_name != "debug" or model_name != "resnet18":
-        # TODO: get CE and RCE and append to results
-        pass
-
     # save model results
     os.makedirs("results/", exist_ok=True)
     results_name = model_name + "_results.json"
@@ -359,7 +342,7 @@ def main(model_name, lr, batch_size, epochs, data_dir, seed):
     with open(results_path, "w") as fp:
         json.dump(results, fp)
 
-    return
+    return results
 
     #######################
     # END OF YOUR CODE    #
