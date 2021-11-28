@@ -16,4 +16,4 @@ source activate dl1_gpu
 
 cd $HOME/dl1-labs/assignment2/part1/
 rsync -a $HOME/dl1-labs/assignment2/part1/data/ $TMPDIR
-srun python -u main_cnn.py --data_dir "/scratch/"
+srun python -u main_cnn.py --data_dir "/scratch/" --model_name "resnet18"
