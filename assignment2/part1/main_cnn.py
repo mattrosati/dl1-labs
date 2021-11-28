@@ -180,6 +180,8 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
         if temp_accuracy > best_accuracy:
             model = deepcopy(temp_model)
             best_accuracy = temp_accuracy
+    print("trained on", next(model.parameters()).is_cuda)
+    print("temp model on", next(temp_model.parameters()).is_cuda)
     # close tensor logger
     writer.close()
 
@@ -213,7 +215,6 @@ def evaluate_model(model, data_loader, device):
     #######################
     accuracy_sum = 0
     model.eval()
-    next(model.parameters()).is_cuda
     for batch, targets in data_loader:
         batch = batch.to(device)
         targets = targets.to(device)
@@ -320,7 +321,6 @@ def main(model_name, lr, batch_size, epochs, data_dir, seed):
         torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
     )
     set_seed(seed)
-    print(device)
 
     # load model class
     model = get_model(model_name, num_classes=10)
@@ -332,6 +332,7 @@ def main(model_name, lr, batch_size, epochs, data_dir, seed):
     if os.path.isfile(model_path):
         print("loading model")
         model.load_state_dict(torch.load(model_path))
+        model = model.to(device)
     else:
         model = train_model(model, lr, batch_size, epochs, data_dir, model_name, device)
 
