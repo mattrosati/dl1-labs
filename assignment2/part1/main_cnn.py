@@ -332,7 +332,7 @@ def main(model_name, lr, batch_size, epochs, data_dir, seed):
     model_path = os.path.join("models", file_name)
     if os.path.isfile(model_path):
         print("loading model")
-        model.load_state_dict(torch.load(model_path))
+        model.load_state_dict(torch.load(model_path, map_location=device))
         model = model.to(device)
     else:
         model = train_model(model, lr, batch_size, epochs, data_dir, model_name, device)
