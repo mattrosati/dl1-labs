@@ -41,8 +41,6 @@ class LSTM(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        self.h = torch.zeros(lstm_hidden_dim)
-        self.c = torch.zeros(lstm_hidden_dim)
 
         self.w_gh = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
         self.w_gx = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
@@ -112,32 +110,33 @@ class LSTM(nn.Module):
         #######################
         time, batch_size, embedding_size = embeds.shape
         out = torch.zeros(time, batch_size, self.hidden_dim)
-        for batch in torch.arange(time):
-            for time in torch.arange(batch_size):
-                embed_bt = embeds[batch, time, ...]
-                g = torch.tanh(
-                    torch.matmul(self.w_gx, embed_bt)
-                    + torch.matmul(self.w_gh, self.h)
-                    + self.bg
-                )
-                i = torch.sigmoid(
-                    torch.matmul(self.w_ix, embed_bt)
-                    + torch.matmul(self.w_ih, self.h)
-                    + self.bi
-                )
-                f = torch.sigmoid(
-                    torch.matmul(self.w_fx, embed_bt)
-                    + torch.matmul(self.w_fh, self.h)
-                    + self.bf
-                )
-                o = torch.sigmoid(
-                    torch.matmul(self.w_ox, embed_bt)
-                    + torch.matmul(self.w_oh, self.h)
-                    + self.bo
-                )
-                self.c = g * i + self.c * f
-                self.h = torch.tanh(self.c) * o
-                out[batch, time, ...] = self.h
+        h = torch.zeros(batch_size, self.hidden_dim)
+        c = torch.zeros(batch_size, self.hidden_dim)
+        for time in torch.arange(time):
+            embed_t = embeds[time, ...]
+            g = torch.tanh(
+                torch.matmul(embed_t, self.w_gx.t())
+                + torch.matmul(h, self.w_gh.t())
+                + self.bg
+            )
+            i = torch.sigmoid(
+                torch.matmul(embed_t, self.w_ix.t())
+                + torch.matmul(h, self.w_ih.t())
+                + self.bi
+            )
+            f = torch.sigmoid(
+                torch.matmul(embed_t, self.w_fx.t())
+                + torch.matmul(h, self.w_fh.t())
+                + self.bf
+            )
+            o = torch.sigmoid(
+                torch.matmul(embed_t, self.w_ox.t())
+                + torch.matmul(h, self.w_oh.t())
+                + self.bo
+            )
+            c = g * i + c * f
+            h = torch.tanh(c) * o
+            out[time, ...] = h
 
         return out
 
