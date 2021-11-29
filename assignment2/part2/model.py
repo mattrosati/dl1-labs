@@ -41,20 +41,23 @@ class LSTM(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        self.W_gh = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
-        self.W_gx = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
+        self.h = torch.zeros(lstm_hidden_dim)
+        self.c = torch.zeros(lstm_hidden_dim)
+
+        self.w_gh = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
+        self.w_gx = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
         self.bg = torch.nn.Parameter(torch.zeros(lstm_hidden_dim))
 
-        self.W_ih = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
-        self.W_ix = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
+        self.w_ih = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
+        self.w_ix = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
         self.bi = torch.nn.Parameter(torch.zeros(lstm_hidden_dim))
 
-        self.W_fh = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
-        self.W_fx = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
+        self.w_fh = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
+        self.w_fx = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
         self.bf = torch.nn.Parameter(torch.zeros(lstm_hidden_dim))
 
-        self.W_oh = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
-        self.W_ox = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
+        self.w_oh = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
+        self.w_ox = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
         self.bo = torch.nn.Parameter(torch.zeros(lstm_hidden_dim))
 
         #######################
@@ -79,8 +82,8 @@ class LSTM(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
         factor = 1 / math.sqrt(self.hidden_dim)
-        for name, w in self.named_parameters():
-            nn.init.uniform_(w, a=-1 * factor, b=factor)
+        for name, params in self.named_parameters():
+            nn.init.uniform_(params, a=-1 * factor, b=factor)
         with torch.no_grad():
             self.bf += 1
         print("initialized all parameters")
@@ -94,7 +97,7 @@ class LSTM(nn.Module):
         Forward pass of LSTM.
 
         Args:
-            embeds: embedded input sequence with shape [input length, batch size, hidden dimension].
+            embeds: embedded input sequence with shape [input length, batch size, embedding size].
 
         TODO:
           Specify the LSTM calculations on the input sequence.
@@ -107,7 +110,37 @@ class LSTM(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        time, batch_size, embedding_size = embeds.shape
+        out = torch.zeros(time, batch_size, self.hidden_dim)
+        for batch in torch.arange(time):
+            for time in torch.arange(batch_size):
+                embed_bt = embeds[batch, time, ...]
+                g = torch.tanh(
+                    torch.matmul(self.w_gx, embed_bt)
+                    + torch.matmul(self.w_gh, self.h)
+                    + self.bg
+                )
+                i = torch.sigmoid(
+                    torch.matmul(self.w_ix, embed_bt)
+                    + torch.matmul(self.w_ih, self.h)
+                    + self.bi
+                )
+                f = torch.sigmoid(
+                    torch.matmul(self.w_fx, embed_bt)
+                    + torch.matmul(self.w_fh, self.h)
+                    + self.bf
+                )
+                o = torch.sigmoid(
+                    torch.matmul(self.w_ox, embed_bt)
+                    + torch.matmul(self.w_oh, self.h)
+                    + self.bo
+                )
+                self.c = g * i + self.c * f
+                self.h = torch.tanh(self.c) * o
+                out[batch, time, ...] = self.h
+
+        return out
+
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -186,4 +219,8 @@ class TextGenerationModel(nn.Module):
 
 
 if __name__ == "__main__":
-    a = LSTM(5, 4)
+    model = LSTM(5, 4)
+    out = model.forward(nn.init.uniform_(torch.zeros(2, 3, 4)))
+    print(out)
+    print(out.shape)
+
