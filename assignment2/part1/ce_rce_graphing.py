@@ -3,6 +3,7 @@ import os
 import argparse
 import json
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
 
 def load_results(file_list):
@@ -20,17 +21,26 @@ def load_results(file_list):
 
 
 def ce(accuracies, resnet18_acc):
-    pass
+    values = {}
+    for c in accuracies.keys():
+        if c != "clean":
+            values[c] = np.sum(accuracies[c]) / np.sum(resnet18_acc[c])
+    return values
 
 
 def rce(accuracies, resnet18_acc):
-    pass
+    values = {}
+    for c in accuracies.keys():
+        if c != "clean":
+            values[c] = np.sum(accuracies[c] - np.array(accuracies["clean"])) / np.sum(
+                resnet18_acc[c] - np.array(resnet18_acc["clean"])
+            )
+    return values
 
 
 if __name__ == "__main__":
     models = ["vgg11", "vgg11_bn", "resnet18", "resnet34", "densenet121"]
     corruptions = {
-        "clean": "Baseline",
         "gnoise": "Gaussian Noise",
         "gblur": "Gaussian Blur",
         "contrast": "Contrast Reduction",
@@ -50,20 +60,20 @@ if __name__ == "__main__":
             metrics["ce"][key] = ce(accuracies[key], accuracies["resnet18"])
             metrics["rce"][key] = rce(accuracies[key], accuracies["resnet18"])
         else:
-            f, ax = plt.subplots(1, 1)
+            f, ax = plt.subplots()
             for c in accuracies[key].keys():
                 if c == "clean":
                     ax.plot(
                         np.arange(1, 6),
                         np.repeat(accuracies[key][c], 5),
                         "k--",
-                        label=corruptions[c],
+                        label="Baseline",
                     )
                 else:
                     ax.plot(
                         np.arange(1, 6),
                         accuracies[key][c],
-                        color=colors.pop(),
+                        color=colors.pop(0),
                         marker="o",
                         linestyle="solid",
                         label=corruptions[c],
@@ -75,7 +85,34 @@ if __name__ == "__main__":
             )
             ax.set_xticks(np.arange(1, 6))
             ax.legend()
+            f.tight_layout()
             plt.show()
 
     # plot rce and ce results
+    f, axs = plt.subplots(1, 2, sharey=True)
+    color_map = cm.get_cmap("Purples")
+    colors = color_map(np.linspace(0, 1, num=4))
+    bar_width = 0.2
+    y_ticks = np.arange(len(corruptions))
+    for i, key in enumerate(metrics.keys()):
+        j = 0
+        for model in metrics[key]:
+            axs[i].barh(
+                y=y_ticks + j * bar_width,
+                width=list(metrics[key][model].values()),
+                label=model,
+                height=bar_width,
+                edgecolor="black",
+                color=colors[j],
+            )
+            j += 1
+            axs[i].set_yticklabels([corruptions[k] for k in metrics[key][model].keys()])
+        axs[i].set_yticks(y_ticks + bar_width * (len(corruptions) - 1) / 2)
+        if key == "ce":
+            axs[i].set_title("CE values (normalized with ResNet18 accuracies)")
+        else:
+            axs[i].set_title("RCE values (normalized with ResNet18 accuracies)")
+    axs[-1].legend()
+    f.suptitle("CE and RCE metrics of various models and data corruption functions")
+    plt.show()
 
