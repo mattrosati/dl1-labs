@@ -23,6 +23,7 @@ class LSTM(nn.Module):
     """
     Own implementation of LSTM cell.
     """
+
     def __init__(self, lstm_hidden_dim, embedding_size):
         """
         Initialize all parameters of the LSTM class.
@@ -40,7 +41,22 @@ class LSTM(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        self.W_gh = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
+        self.W_gx = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
+        self.bg = torch.nn.Parameter(torch.zeros(lstm_hidden_dim))
+
+        self.W_ih = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
+        self.W_ix = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
+        self.bi = torch.nn.Parameter(torch.zeros(lstm_hidden_dim))
+
+        self.W_fh = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
+        self.W_fx = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
+        self.bf = torch.nn.Parameter(torch.zeros(lstm_hidden_dim))
+
+        self.W_oh = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
+        self.W_ox = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
+        self.bo = torch.nn.Parameter(torch.zeros(lstm_hidden_dim))
+
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -62,7 +78,13 @@ class LSTM(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        factor = 1 / math.sqrt(self.hidden_dim)
+        for name, w in self.named_parameters():
+            nn.init.uniform_(w, a=-1 * factor, b=factor)
+        with torch.no_grad():
+            self.bf += 1
+        print("initialized all parameters")
+
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -97,6 +119,7 @@ class TextGenerationModel(nn.Module):
     It should take care of the character embedding,
     and linearly maps the output of the LSTM to your vocabulary.
     """
+
     def __init__(self, args):
         """
         Initializing the components of the TextGenerationModel.
@@ -139,7 +162,7 @@ class TextGenerationModel(nn.Module):
         # END OF YOUR CODE    #
         #######################
 
-    def sample(self, batch_size=4, sample_length=30, temperature=0.):
+    def sample(self, batch_size=4, sample_length=30, temperature=0.0):
         """
         Sampling from the text generation model.
 
@@ -160,3 +183,7 @@ class TextGenerationModel(nn.Module):
         #######################
         # END OF YOUR CODE    #
         #######################
+
+
+if __name__ == "__main__":
+    a = LSTM(5, 4)
