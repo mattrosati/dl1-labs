@@ -169,7 +169,20 @@ class TextGenerationModel(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        self.vocabulary_size = args.vocabulary_size
+        self.embedding_size = args.embedding_size
+        self.lstm_hidden_dim = args.lstm_hidden_dim
+
+        self.embedding = nn.Embedding(self.vocabulary_size, self.embedding_size)
+        self.lstm = LSTM(self.lstm_hidden_dim, self.embedding_size)
+
+        self.layers = nn.Sequential(
+            nn.Embedding(self.vocabulary_size, self.embedding_size),
+            LSTM(self.lstm_hidden_dim, self.embedding_size),
+            nn.Linear(self.lstm_hidden_dim, self.vocabulary_size),
+            nn.Softmax,
+        )
+
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -189,7 +202,11 @@ class TextGenerationModel(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        x = self.embedding(x)
+        x = self.lstm.forward(x)
+        x = torch.matmul(x, self.w_ph) + self.bp
+        x = torch.softmax(x)
+        return x
         #######################
         # END OF YOUR CODE    #
         #######################

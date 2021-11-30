@@ -24,7 +24,9 @@ def ce(accuracies, resnet18_acc):
     values = {}
     for c in accuracies.keys():
         if c != "clean":
-            values[c] = np.sum(accuracies[c]) / np.sum(resnet18_acc[c])
+            values[c] = np.sum(1 - np.array(accuracies[c])) / np.sum(
+                1 - np.array(resnet18_acc[c])
+            )
     return values
 
 
@@ -32,8 +34,12 @@ def rce(accuracies, resnet18_acc):
     values = {}
     for c in accuracies.keys():
         if c != "clean":
-            values[c] = np.sum(accuracies[c] - np.array(accuracies["clean"])) / np.sum(
-                resnet18_acc[c] - np.array(resnet18_acc["clean"])
+            model_err = 1 - np.array(accuracies[c])
+            clean_err = 1 - np.array(accuracies["clean"])
+            norm_err = 1 - np.array(resnet18_acc[c])
+            norm_clean_err = 1 - np.array(resnet18_acc["clean"])
+            values[c] = np.sum(model_err - clean_err) / np.sum(
+                norm_err - norm_clean_err
             )
     return values
 
