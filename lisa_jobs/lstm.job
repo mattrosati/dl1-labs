@@ -15,4 +15,4 @@ module load Anaconda3/2021.05
 source activate dl1_gpu
 
 cd $HOME/dl1-labs/assignment2/part2/
-python train.py --txt_file assets/book_EN_democracy_in_the_US.txt --num_epochs 2
+srun python -u train.py --txt_file assets/book_EN_democracy_in_the_US.txt
