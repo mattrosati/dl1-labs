@@ -150,7 +150,7 @@ def train_model(model, lr, batch_size, epochs, data_dir, checkpoint_name, device
             targets = targets.to(device)
 
             if not model_plotted:
-                writer.add_graph(model, batch)
+                writer.add_graph(temp_model, batch)
                 model_plotted = True
 
             # run forward
