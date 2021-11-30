@@ -134,6 +134,28 @@ class LSTM(nn.Module):
             h = torch.tanh(c) * o
             out[time, ...] = h
 
+            # embed_t = embeds[time, ...]
+            # g = torch.tanh(
+            #     torch.matmul(embed_t, self.w_gx.t())
+            #     + torch.matmul(h, self.w_gh.t())
+            #     + self.bg
+            # )
+            # i = torch.sigmoid(
+            #     torch.matmul(embed_t, self.w_ix.t())
+            #     + torch.matmul(h, self.w_ih.t())
+            #     + self.bi
+            # )
+            # f = torch.sigmoid(
+            #     torch.matmul(embed_t, self.w_fx.t())
+            #     + torch.matmul(h, self.w_fh.t())
+            #     + self.bf
+            # )
+            # o = torch.sigmoid(
+            #     torch.matmul(embed_t, self.w_ox.t())
+            #     + torch.matmul(h, self.w_oh.t())
+            #     + self.bo
+            # )
+
         return out
 
         #######################

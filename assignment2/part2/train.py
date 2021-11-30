@@ -16,13 +16,16 @@
 
 from datetime import datetime
 import argparse
+from torch.utils import data
 from tqdm.auto import tqdm
+import os
 
 import torch
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
 from dataset import TextDataset, text_collate_fn
 from model import TextGenerationModel
@@ -66,38 +69,124 @@ def train(args):
     # The data loader returns pairs of tensors (input, targets) where inputs are the
     # input characters, and targets the labels, i.e. the text shifted by one.
     dataset = TextDataset(args.txt_file, args.input_seq_length)
-    data_loader = DataLoader(dataset, args.batch_size, 
-                             shuffle=True, drop_last=True, pin_memory=True,
-                             collate_fn=text_collate_fn)
+    data_loader = DataLoader(
+        dataset,
+        args.batch_size,
+        shuffle=True,
+        drop_last=True,
+        pin_memory=True,
+        collate_fn=text_collate_fn,
+    )
+    args.vocabulary_size = dataset.vocabulary_size
     # Create model
-    model = ...
-    # Create optimizer
-    optimizer = ...
+    model = TextGenerationModel(args)
+    # Create optimizer and loss
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    loss_module = nn.CrossEntropyLoss().to(args.device)
+
+    # make writer object
+    writer = SummaryWriter("logger/")
+    model_plotted = False
+
     # Training loop
-    pass
+    model = model.to(args.device)
+    batch_n = len(data_loader)
+    for i in range(args.num_epochs):
+        model.train()
+
+        # initialize metrics
+        loss = 0
+        acc = 0
+        for batch, labels in tqdm(data_loader, unit="batch"):
+            batch = batch.to(args.device)
+            labels = labels.to(args.device)
+
+            if not model_plotted:
+                writer.add_graph(model, batch)
+                model_plotted = True
+
+            out = model(batch)
+
+            out = out.view(-1, model.vocabulary_size)
+            labels = labels.view(-1)
+            loss_batch = loss_module(out, labels)
+            loss += loss_batch.item()
+
+            acc += accuracy(out, labels)
+
+            # run backwards and update params
+            optimizer.zero_grad()
+            loss_batch.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_grad_norm)
+            optimizer.step()
+
+        # add loss and acc to TensorBoard
+        loss /= batch_n
+        acc /= batch_n
+        writer.add_scalar("Training Loss", loss, global_step=i + 1)
+        writer.add_scalar("Training Accuracy", acc, global_step=i + 1)
+
+        # save model at epochs 1, 5, and end to generate sentences
+        os.makedirs("models/", exist_ok=True)
+        book_name = "_".join(
+            args.txt_file.replace("/", ".").replace("_", ".").split(".")[2:-1]
+        )
+        checkpoint_path = os.path.join("models", "lstm_" + book_name + str(i) + ".pth")
+        torch.save(model.state_dict(), checkpoint_path)
+
     #######################
     # END OF YOUR CODE    #
     #######################
+
+
+def accuracy(out, labels):
+    return (out.argmax(dim=-1) == labels).float().mean().item()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()  # Parse training configuration
 
     # Model
-    parser.add_argument('--txt_file', type=str, required=True, help="Path to a .txt file to train on")
-    parser.add_argument('--input_seq_length', type=int, default=30, help='Length of an input sequence')
-    parser.add_argument('--lstm_hidden_dim', type=int, default=1024, help='Number of hidden units in the LSTM')
-    parser.add_argument('--embedding_size', type=int, default=256, help='Dimensionality of the embeddings.')
+    parser.add_argument(
+        "--txt_file", type=str, required=True, help="Path to a .txt file to train on"
+    )
+    parser.add_argument(
+        "--input_seq_length", type=int, default=30, help="Length of an input sequence"
+    )
+    parser.add_argument(
+        "--lstm_hidden_dim",
+        type=int,
+        default=1024,
+        help="Number of hidden units in the LSTM",
+    )
+    parser.add_argument(
+        "--embedding_size",
+        type=int,
+        default=256,
+        help="Dimensionality of the embeddings.",
+    )
 
     # Training
-    parser.add_argument('--batch_size', type=int, default=128, help='Batch size to train with.')
-    parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate for the optimizer.')
-    parser.add_argument('--num_epochs', type=int, default=20, help='Number of epochs to train for.')
-    parser.add_argument('--clip_grad_norm', type=float, default=5.0, help='Gradient clipping norm')
+    parser.add_argument(
+        "--batch_size", type=int, default=128, help="Batch size to train with."
+    )
+    parser.add_argument(
+        "--lr", type=float, default=1e-3, help="Learning rate for the optimizer."
+    )
+    parser.add_argument(
+        "--num_epochs", type=int, default=20, help="Number of epochs to train for."
+    )
+    parser.add_argument(
+        "--clip_grad_norm", type=float, default=5.0, help="Gradient clipping norm"
+    )
 
     # Additional arguments. Feel free to add more arguments
-    parser.add_argument('--seed', type=int, default=0, help='Seed for pseudo-random number generator')
+    parser.add_argument(
+        "--seed", type=int, default=0, help="Seed for pseudo-random number generator"
+    )
 
     args = parser.parse_args()
-    args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # Use GPU if available, else use CPU
+    args.device = torch.device(
+        "cuda" if torch.cuda.is_available() else "cpu"
+    )  # Use GPU if available, else use CPU
     train(args)
