@@ -15,6 +15,7 @@
 ###############################################################################
 
 import math
+from numpy.random.mtrand import random
 import torch
 import torch.nn as nn
 
@@ -80,7 +81,7 @@ class LSTM(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
         factor = 1 / math.sqrt(self.hidden_dim)
-        for name, params in self.named_parameters():
+        for _, params in self.named_parameters():
             nn.init.uniform_(params, a=-1 * factor, b=factor)
         with torch.no_grad():
             self.bf += 1
@@ -173,14 +174,10 @@ class TextGenerationModel(nn.Module):
         self.embedding_size = args.embedding_size
         self.lstm_hidden_dim = args.lstm_hidden_dim
 
-        self.embedding = nn.Embedding(self.vocabulary_size, self.embedding_size)
-        self.lstm = LSTM(self.lstm_hidden_dim, self.embedding_size)
-
         self.layers = nn.Sequential(
             nn.Embedding(self.vocabulary_size, self.embedding_size),
             LSTM(self.lstm_hidden_dim, self.embedding_size),
             nn.Linear(self.lstm_hidden_dim, self.vocabulary_size),
-            nn.Softmax,
         )
 
         #######################
@@ -202,11 +199,7 @@ class TextGenerationModel(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        x = self.embedding(x)
-        x = self.lstm.forward(x)
-        x = torch.matmul(x, self.w_ph) + self.bp
-        x = torch.softmax(x)
-        return x
+        return self.layers(x)
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -228,15 +221,61 @@ class TextGenerationModel(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        random_chars = torch.randint(
+            low=0, high=self.vocabulary_size, size=(1, batch_size,)
+        )
+
+        samples = [[] for i in range(batch_size)]
+        pred = None
+        for i in torch.arange(sample_length):
+            # run network on sampled characters
+            if pred == None:
+                out = self.forward(random_chars)
+            else:
+                out = self.forward(pred)
+
+            # perform softmax or argmax sampling
+            if temperature > 0:
+                softie = torch.softmax(out / temperature, dim=-1)
+                pred = torch.multinomial(softie, batch_size, replacement=True)
+            else:
+                # no need for softmax because it's a map to monotonically increasing func
+                pred = out.argmax(dim=-1)
+
+            # stack results
+            for j, c in enumerate(pred.flatten()):
+                samples[j].append(c.item())
+
+        return samples
+
         #######################
         # END OF YOUR CODE    #
         #######################
 
 
 if __name__ == "__main__":
-    model = LSTM(5, 4)
-    out = model.forward(nn.init.uniform_(torch.zeros(2, 3, 4)))
-    print(out)
-    print(out.shape)
+    import argparse
+
+    parser = argparse.ArgumentParser()  # Parse training configuration
+
+    # Model
+    parser.add_argument(
+        "--vocabulary_size", type=int, default=30, help="Length of an input sequence"
+    )
+    parser.add_argument(
+        "--lstm_hidden_dim",
+        type=int,
+        default=5,
+        help="Number of hidden units in the LSTM",
+    )
+    parser.add_argument(
+        "--embedding_size",
+        type=int,
+        default=10,
+        help="Dimensionality of the embeddings.",
+    )
+
+    args = parser.parse_args()
+    text_gen = TextGenerationModel(args)
+    print(text_gen.sample())
 
