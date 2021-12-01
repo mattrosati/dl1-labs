@@ -216,4 +216,6 @@ if __name__ == "__main__":
             for k, s in enumerate(sampled):
                 print(f"Sample {k+1}")
                 print(dataset.convert_to_string(s))
+            model.lstm.h = None
+            model.lstm.c = None
             print("//")
