@@ -208,8 +208,8 @@ class TextGenerationModel(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
+        self.mode = "no_cache"
 
-        # changeeeeeeeeee
         samples = torch.randint(
             low=0, high=self.vocabulary_size, size=(sample_length, batch_size)
         )
@@ -229,7 +229,9 @@ class TextGenerationModel(nn.Module):
                 pred = out.argmax(dim=-1)
 
             # add results
-            samples[i, :] = pred.squeeze()
+            print(samples[i, :].shape)
+            print(pred.shape)
+            samples[i, :] = pred
             if i == 1:
                 self.mode = "generate"
 
