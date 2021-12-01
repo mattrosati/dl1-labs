@@ -192,3 +192,28 @@ if __name__ == "__main__":
         "cuda" if torch.cuda.is_available() else "cpu"
     )  # Use GPU if available, else use CPU
     train(args)
+
+    book_name = "_".join(
+        args.txt_file.replace("/", ".").replace("_", ".").split(".")[2:-1]
+    )
+    for i in [0, 4, args.num_epochs - 1]:
+        model_path = os.path.join("models", "lstm_" + book_name + str(i) + ".pth")
+        if os.path.isfile(model_path):
+            set_seed(args.seed)
+            dataset = TextDataset(args.txt_file, args.input_seq_length)
+            args.vocabulary_size = dataset.vocabulary_size
+            model = TextGenerationModel(args)
+            print(f"Finding {dataset.vocabulary_size} unique characters")
+            print(f"Found saved model at epoch {i+1}")
+            print("Generating sentences:")
+            model.load_state_dict(torch.load(model_path, map_location=args.device))
+            for temp in [0, 0.5, 1, 2.0]:
+                sampled = model.sample(batch_size=5, temperature=temp)
+                for k, s in enumerate(sampled):
+                    print(f"Sample {k}")
+                    print(dataset.convert_to_string(sampled))
+        else:
+            print(model_path)
+            print("Not all models present, training again")
+            train(args)
+            break
