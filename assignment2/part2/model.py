@@ -101,7 +101,6 @@ class LSTM(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
         time, batch_size, _ = embeds.shape
-        print(time)
         out = torch.zeros(time, batch_size, self.hidden_dim).to(self.w.device)
 
         if self.mode == "no_cache":
@@ -218,6 +217,7 @@ class TextGenerationModel(nn.Module):
 
         for i in range(1, sample_length):
             # run network on sampled characters
+            print(samples[i - 1, :].shape)
             out = self.forward(samples[i - 1, :].unsqueeze(dim=-1))
             print(out.shape)
 
