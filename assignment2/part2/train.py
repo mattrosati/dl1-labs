@@ -103,10 +103,6 @@ def train(args):
 
             out = model(batch)
 
-            # if not model_plotted:
-            #     writer.add_graph(model, batch, verbose=True)
-            #     model_plotted = True
-
             out = out.view(-1, model.vocabulary_size)
             labels = labels.view(-1)
             loss_batch = loss_module(out, labels)
