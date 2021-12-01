@@ -48,8 +48,7 @@ class LSTM(nn.Module):
         )
         self.b = torch.nn.Parameter(torch.zeros(4 * self.hidden_dim))
 
-        self.h = None
-        self.c = None
+        self.mode = "no_cache"
 
         #######################
         # END OF YOUR CODE    #
@@ -104,9 +103,8 @@ class LSTM(nn.Module):
         time, batch_size, _ = embeds.shape
         out = torch.zeros(time, batch_size, self.hidden_dim)
 
-        if self.h is None:
+        if self.mode == "no_cache":
             self.h = torch.zeros(batch_size, self.hidden_dim)
-        if self.c is None:
             self.c = torch.zeros(batch_size, self.hidden_dim)
 
         for time in range(time):
@@ -218,7 +216,7 @@ class TextGenerationModel(nn.Module):
 
         for i in range(1, sample_length):
             # run network on sampled characters
-            out = self.forward(samples[i - 1, :])
+            out = self.forward(samples[i - 1, :].unsqueeze(dim=-1))
 
             # perform softmax or argmax sampling
             if temperature > 0:
@@ -229,7 +227,7 @@ class TextGenerationModel(nn.Module):
                 pred = out.argmax(dim=-1)
 
             # add results
-            samples[i, :] = pred
+            samples[i, :] = pred.squeeze()
 
         return samples
 
@@ -266,5 +264,5 @@ if __name__ == "__main__":
     print(out)
     print(out.shape)
     text_gen = TextGenerationModel(args)
-    print(text_gen.sample())
+    print(text_gen.sample()[0, :])
 
