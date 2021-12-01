@@ -116,6 +116,9 @@ def train(args):
             torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_grad_norm)
             optimizer.step()
 
+            model.lstm.h = None
+            model.lstm.c = None
+
         # add loss and acc to TensorBoard
         loss /= batch_n
         acc /= batch_n

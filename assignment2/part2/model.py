@@ -48,7 +48,8 @@ class LSTM(nn.Module):
         )
         self.b = torch.nn.Parameter(torch.zeros(4 * self.hidden_dim))
 
-        self.mode = "no_cache"
+        self.h = None
+        self.c = None
 
         #######################
         # END OF YOUR CODE    #
@@ -103,8 +104,9 @@ class LSTM(nn.Module):
         time, batch_size, _ = embeds.shape
         out = torch.zeros(time, batch_size, self.hidden_dim).to(self.w.device)
 
-        if self.mode == "no_cache":
+        if self.h is None:
             self.h = torch.zeros(batch_size, self.hidden_dim).to(self.w.device)
+        if self.c is None:
             self.c = torch.zeros(batch_size, self.hidden_dim).to(self.w.device)
 
         for time in range(time):
@@ -208,7 +210,6 @@ class TextGenerationModel(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        self.mode = "no_cache"
 
         samples = torch.randint(
             low=0, high=self.vocabulary_size, size=(sample_length, batch_size)
@@ -228,8 +229,6 @@ class TextGenerationModel(nn.Module):
 
             # add results
             samples[i, :] = pred.squeeze()
-            if i == 1:
-                self.mode = "generate"
 
         samples = samples.t().tolist()
         return samples
