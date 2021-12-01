@@ -212,7 +212,7 @@ if __name__ == "__main__":
         model.load_state_dict(torch.load(model_path, map_location=args.device))
         for temp in [0, 0.5, 1, 2.0]:
             print(f"Using temp {temp}")
-            sampled = model.sample(sample_length=200, batch_size=5, temperature=temp)
+            sampled = model.sample(sample_length=30, batch_size=5, temperature=temp)
             for k, s in enumerate(sampled):
                 print(f"Sample {k+1}")
                 print(dataset.convert_to_string(s))
