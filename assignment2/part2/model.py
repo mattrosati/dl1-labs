@@ -216,13 +216,9 @@ class TextGenerationModel(nn.Module):
             low=0, high=self.vocabulary_size, size=(sample_length, batch_size)
         )
 
-        pred = None
         for i in range(1, sample_length):
             # run network on sampled characters
-            if i == 1:
-                out = self.forward(random_chars)
-            else:
-                out = self.forward(pred)
+            out = self.forward(samples[i - 1, :])
 
             # perform softmax or argmax sampling
             if temperature > 0:
@@ -232,9 +228,8 @@ class TextGenerationModel(nn.Module):
                 # no need for softmax because it's a map to monotonically increasing func
                 pred = out.argmax(dim=-1)
 
-            # stack results
-            for j, c in enumerate(pred.flatten()):
-                samples[j].append(c.item())
+            # add results
+            samples[i, :] = pred
 
         return samples
 
