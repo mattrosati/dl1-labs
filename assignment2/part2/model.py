@@ -218,7 +218,7 @@ class TextGenerationModel(nn.Module):
         for i in range(1, sample_length):
             # run network on sampled characters
             print(samples[i - 1, :].shape)
-            out = self.forward(samples[i - 1, :].unsqueeze(dim=-1))
+            out = self.forward(samples[i - 1, :].unsqueeze(dim=0))
             print(out.shape)
 
             # perform softmax or argmax sampling
