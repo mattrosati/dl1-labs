@@ -191,7 +191,6 @@ if __name__ == "__main__":
     args.device = torch.device(
         "cuda" if torch.cuda.is_available() else "cpu"
     )  # Use GPU if available, else use CPU
-    train(args)
 
     book_name = "_".join(
         args.txt_file.replace("/", ".").replace("_", ".").split(".")[2:-1]
