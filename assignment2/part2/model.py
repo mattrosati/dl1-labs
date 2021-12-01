@@ -101,11 +101,11 @@ class LSTM(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
         time, batch_size, _ = embeds.shape
-        out = torch.zeros(time, batch_size, self.hidden_dim)
+        out = torch.zeros(time, batch_size, self.hidden_dim).to(self.w.device)
 
         if self.mode == "no_cache":
-            self.h = torch.zeros(batch_size, self.hidden_dim)
-            self.c = torch.zeros(batch_size, self.hidden_dim)
+            self.h = torch.zeros(batch_size, self.hidden_dim).to(self.w.device)
+            self.c = torch.zeros(batch_size, self.hidden_dim).to(self.w.device)
 
         for time in range(time):
 
