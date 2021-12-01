@@ -221,9 +221,9 @@ class TextGenerationModel(nn.Module):
 
             # perform softmax or argmax sampling
             if temperature > 0:
-                softie = torch.softmax(out / temperature, dim=-1)
+                softie = torch.softmax(out / temperature, dim=-1).squeeze()
                 print(softie.shape)
-                pred = torch.multinomial(softie, batch_size, replacement=True)
+                pred = torch.multinomial(softie, num_samples=1, replacement=True)
                 print(pred)
             else:
                 # no need for softmax because it's a map to monotonically increasing func
