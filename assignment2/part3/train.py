@@ -25,6 +25,7 @@ import torch.nn as nn
 from torch_geometric.data.batch import Batch
 from torch_geometric.loader import DataLoader
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 from data import *
 from networks import *
@@ -83,17 +84,23 @@ def compute_loss(
     #######################
     # PUT YOUR CODE HERE  #
     #######################
+    labels = get_labels(molecules)
     if model.info["name"] == "MLP":
         features = get_mlp_features(molecules)
-        labels = get_labels(molecules)
         out = model.forward(features)
-        out = out.squeeze()
-        loss = criterion(out, labels)
     elif model.info["name"] == "GNN":
-        pass
+        features = get_node_features(molecules)
+        out = model.forward(
+            features,
+            molecules.edge_index,
+            molecules.edge_attr.argmax(dim=-1),
+            molecules.batch,
+        )
     else:
         print("something is wonky with network name")
 
+    out = out.squeeze()
+    loss = criterion(out, labels)
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -127,10 +134,10 @@ def evaluate_model(
     # PUT YOUR CODE HERE  #
     #######################
     avg_loss = 0
+    model.eval()
     n_batches = len(data_loader)
     for batch in data_loader:
         if permute:
-            print("permuting")
             batch = permute_indices(batch)
         loss_batch = compute_loss(model, batch, criterion)
         avg_loss += loss_batch.item()
@@ -214,6 +221,7 @@ def train(
 
     losses = {"train": np.zeros(epochs), "val": np.zeros(epochs)}
     modes = ["train", "val"]
+    print(next(iter(train_dataloader)))
 
     best_loss = np.inf
 
@@ -301,6 +309,15 @@ def main(**kwargs):
     )
 
     # plot the loss curve, etc. below.
+
+    f, ax = plt.subplots()
+    ax.plot(np.arange(1, len(val_losses) + 1), val_losses, "-bo", label="Validation")
+    ax.plot(np.arange(1, len(logging_info) + 1), logging_info, "-go", label="Training")
+    ax.set_xlabel("Epochs")
+    ax.set_ylabel("Average Loss")
+    ax.set_title("Average Loss per Epoch for " + which_model.upper())
+    ax.legend()
+    plt.show()
 
 
 if __name__ == "__main__":

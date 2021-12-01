@@ -129,7 +129,29 @@ class GNN(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        super().__init__()
+        layers = [nn.Linear(n_node_features, n_hidden)]
+        for i in range(num_convolution_blocks):
+            layers += [
+                nn.ReLU(),
+                geom_nn.RGCNConv(n_hidden, n_hidden, n_edge_features),
+                nn.ReLU(),
+                geom_nn.MFConv(n_hidden, n_hidden),
+            ]
+
+        self.gnn = nn.ModuleList(layers)
+        self.head = nn.Sequential(
+            nn.Linear(n_hidden, n_hidden), nn.ReLU(), nn.Linear(n_hidden, n_output)
+        )
+
+        self.info = {
+            "name": self.__class__.__name__,
+            "n_node_features": n_node_features,
+            "n_edge_features": n_edge_features,
+            "n_hidden": n_hidden,
+            "n_output": n_output,
+            "num_convolution_blocks": num_convolution_blocks,
+        }
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -159,7 +181,19 @@ class GNN(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
+        for l in self.gnn:
+            if isinstance(l, geom_nn.RGCNConv):
+                x = l(x, edge_index, edge_attr)
+            elif isinstance(l, geom_nn.MFConv):
+                x = l(x, edge_index)
+            else:
+                x = l(x)
 
+        # Global pooling
+        x = geom_nn.global_add_pool(x, batch_idx)
+
+        # Linear section
+        out = self.head(x)
         #######################
         # END OF YOUR CODE    #
         #######################
