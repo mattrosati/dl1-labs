@@ -217,6 +217,7 @@ class TextGenerationModel(nn.Module):
         for i in range(1, sample_length):
             # run network on sampled characters
             out = self.forward(samples[i - 1, :].unsqueeze(dim=-1))
+            print(out.shape)
 
             # perform softmax or argmax sampling
             if temperature > 0:
