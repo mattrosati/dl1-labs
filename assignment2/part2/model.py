@@ -213,7 +213,6 @@ class TextGenerationModel(nn.Module):
         samples = torch.randint(
             low=0, high=self.vocabulary_size, size=(sample_length, batch_size)
         )
-        print(samples.shape)
 
         for i in range(1, sample_length):
             # run network on sampled characters
