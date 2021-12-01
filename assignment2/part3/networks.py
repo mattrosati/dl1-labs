@@ -47,11 +47,10 @@ class MLP(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
         super().__init__()
-        self.flatten = nn.Flatten()
         self.act = nn.ReLU()
         self.use_batch_norm = False
 
-        modules = [self.flatten]
+        modules = []
         dims = [n_inputs] + n_hidden + [n_outputs]
 
         for i in range(0, len(dims) - 2):
@@ -63,6 +62,7 @@ class MLP(nn.Module):
 
         self.layers = nn.Sequential(*modules)
         self.info = {
+            "name": self.__class__.__name__,
             "act": self.act.__class__.__name__,
             "num_inputs": n_inputs,
             "num_classes": n_outputs,
@@ -86,7 +86,7 @@ class MLP(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        pass
+        out = self.layers(x)
         #######################
         # END OF YOUR CODE    #
         #######################

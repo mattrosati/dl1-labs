@@ -83,6 +83,16 @@ def compute_loss(
     #######################
     # PUT YOUR CODE HERE  #
     #######################
+    if model.info["name"] == "MLP":
+        features = get_mlp_features(molecules)
+        labels = get_labels(molecules)
+        out = model.forward(features)
+        out = out.squeeze()
+        loss = criterion(out, labels)
+    elif model.info["name"] == "GNN":
+        pass
+    else:
+        print("something is wonky with network name")
 
     #######################
     # END OF YOUR CODE    #
@@ -116,7 +126,15 @@ def evaluate_model(
     #######################
     # PUT YOUR CODE HERE  #
     #######################
-
+    avg_loss = 0
+    n_batches = len(data_loader)
+    for batch in data_loader:
+        if permute:
+            print("permuting")
+            batch = permute_indices(batch)
+        loss_batch = compute_loss(model, batch, criterion)
+        avg_loss += loss_batch.item()
+    avg_loss /= n_batches
     #######################
     # END OF YOUR CODE    #
     #######################
@@ -184,18 +202,69 @@ def train(
     # PUT YOUR CODE HERE  #
     #######################
 
+    device = model.device
     # TODO: Initialize loss module and optimizer
-    criterion = ...
-    optimizer = ...
+    loss_module = nn.MSELoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, amsgrad=True)
     # TODO: Training loop including validation, using evaluate_model
     # TODO: Do optimization, we used adam with amsgrad. (many should work)
-    val_losses = ...
+    model_temp = model
+    n_batches_train = len(train_dataloader)
+    n_batches_val = len(valid_dataloader)
+
+    losses = {"train": np.zeros(epochs), "val": np.zeros(epochs)}
+    modes = ["train", "val"]
+
+    best_loss = np.inf
+
+    for epoch in range(epochs):
+        for m in modes:
+            if m == "train":
+                model_temp.train()
+                print("Training epoch:", epoch + 1)
+                loader = train_dataloader
+                n_batch = n_batches_train
+            elif m == "val":
+                model_temp.eval()
+                print("Validation of epoch", epoch + 1)
+                loader = valid_dataloader
+                n_batch = n_batches_val
+            for batch in tqdm(loader, unit="batch"):
+                # move to cuda if available
+                batch = batch.to(device)
+
+                # run forward and compute loss
+                loss_batch = compute_loss(model_temp, batch, loss_module)
+                losses[m][epoch] += loss_batch.item()
+
+                # run backwards and update params
+                if m == "train":
+                    optimizer.zero_grad()
+                    loss_batch.backward()
+                    optimizer.step()
+
+            # average loss over batches
+            losses[m][epoch] = losses[m][epoch] / n_batch
+
+            if m == "val":
+                if losses[m][epoch] < best_loss:
+                    print(
+                        "New best model found, new best loss is", losses[m][epoch],
+                    )
+                    best_model = deepcopy(model_temp)
+                    best_loss = losses[m][epoch]
     # TODO: Test best model
-    test_loss = ...
+    print("Testing model...")
+    test_loss = evaluate_model(best_model, test_dataloader, loss_module, permute=False)
+    print("Best model test loss:", test_loss)
     # TODO: Test best model against permuted indices
-    permuted_test_loss = ...
+    permuted_test_loss = evaluate_model(
+        best_model, test_dataloader, loss_module, permute=True
+    )
+    print("Permuted best model test loss:", permuted_test_loss)
     # TODO: Add any information you might want to save for plotting
-    logging_info = ...
+    val_losses = losses["val"]
+    logging_info = losses["train"]
 
     #######################
     # END OF YOUR CODE    #
