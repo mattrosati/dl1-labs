@@ -133,6 +133,9 @@ def train(args):
             )
             torch.save(model.state_dict(), checkpoint_path)
 
+    # close tensor logger
+    writer.close()
+
     #######################
     # END OF YOUR CODE    #
     #######################
