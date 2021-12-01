@@ -43,26 +43,13 @@ class LSTM(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
 
-        # self.w_gh = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
-        # self.w_gx = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
-        # self.bg = torch.nn.Parameter(torch.zeros(lstm_hidden_dim))
-
-        # self.w_ih = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
-        # self.w_ix = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
-        # self.bi = torch.nn.Parameter(torch.zeros(lstm_hidden_dim))
-
-        # self.w_fh = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
-        # self.w_fx = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
-        # self.bf = torch.nn.Parameter(torch.zeros(lstm_hidden_dim))
-
-        # self.w_oh = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, lstm_hidden_dim))
-        # self.w_ox = torch.nn.Parameter(torch.zeros(lstm_hidden_dim, embedding_size))
-        # self.bo = torch.nn.Parameter(torch.zeros(lstm_hidden_dim))
-
         self.w = torch.nn.Parameter(
             torch.zeros(self.hidden_dim + self.embed_dim, 4 * self.hidden_dim)
         )
         self.b = torch.nn.Parameter(torch.zeros(4 * self.hidden_dim))
+
+        self.h = None
+        self.c = None
 
         #######################
         # END OF YOUR CODE    #
@@ -116,45 +103,29 @@ class LSTM(nn.Module):
         #######################
         time, batch_size, _ = embeds.shape
         out = torch.zeros(time, batch_size, self.hidden_dim)
-        h = torch.zeros(batch_size, self.hidden_dim)
-        c = torch.zeros(batch_size, self.hidden_dim)
+
+        if self.h is None:
+            self.h = torch.zeros(batch_size, self.hidden_dim)
+        if self.c is None:
+            self.c = torch.zeros(batch_size, self.hidden_dim)
+
         for time in range(time):
 
             # compute products
             x = embeds[time, ...]
-            data = torch.cat((h, x), dim=-1)
+            data = torch.cat((self.h, x), dim=-1)
             big_mult = torch.matmul(data, self.w) + self.b
+            # big_mult = torch.matmul(self.h, self.wh) + torch.matmul(x, self.wx) + self.b
+            g, i, f, o = torch.chunk(big_mult, 4, dim=1)
 
             # slice to get various gate values
-            g = torch.tanh(big_mult[..., : self.hidden_dim])
-            i = torch.sigmoid(big_mult[..., self.hidden_dim : 2 * self.hidden_dim])
-            f = torch.sigmoid(big_mult[..., 2 * self.hidden_dim : 3 * self.hidden_dim])
-            o = torch.sigmoid(big_mult[..., 3 * self.hidden_dim :])
-            c = g * i + c * f
-            h = torch.tanh(c) * o
-            out[time, ...] = h
-
-            # embed_t = embeds[time, ...]
-            # g = torch.tanh(
-            #     torch.matmul(embed_t, self.w_gx.t())
-            #     + torch.matmul(h, self.w_gh.t())
-            #     + self.bg
-            # )
-            # i = torch.sigmoid(
-            #     torch.matmul(embed_t, self.w_ix.t())
-            #     + torch.matmul(h, self.w_ih.t())
-            #     + self.bi
-            # )
-            # f = torch.sigmoid(
-            #     torch.matmul(embed_t, self.w_fx.t())
-            #     + torch.matmul(h, self.w_fh.t())
-            #     + self.bf
-            # )
-            # o = torch.sigmoid(
-            #     torch.matmul(embed_t, self.w_ox.t())
-            #     + torch.matmul(h, self.w_oh.t())
-            #     + self.bo
-            # )
+            g = torch.tanh(g)
+            i = torch.sigmoid(i)
+            f = torch.sigmoid(f)
+            o = torch.sigmoid(o)
+            self.c = g * i + self.c * f
+            self.h = torch.tanh(self.c) * o
+            out[time, ...] = self.h
 
         return out
 
@@ -191,11 +162,9 @@ class TextGenerationModel(nn.Module):
         self.embedding_size = args.embedding_size
         self.lstm_hidden_dim = args.lstm_hidden_dim
 
-        self.layers = nn.Sequential(
-            nn.Embedding(self.vocabulary_size, self.embedding_size),
-            LSTM(self.lstm_hidden_dim, self.embedding_size),
-            nn.Linear(self.lstm_hidden_dim, self.vocabulary_size),
-        )
+        self.e = nn.Embedding(self.vocabulary_size, self.embedding_size)
+        self.lstm = LSTM(self.lstm_hidden_dim, self.embedding_size)
+        self.linear = nn.Linear(self.lstm_hidden_dim, self.vocabulary_size)
 
         #######################
         # END OF YOUR CODE    #
@@ -216,7 +185,10 @@ class TextGenerationModel(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        return self.layers(x)
+        x = self.e(x)
+        x = self.lstm(x)
+        x = self.linear(x)
+        return x
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -238,15 +210,16 @@ class TextGenerationModel(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        random_chars = torch.randint(
-            low=0, high=self.vocabulary_size, size=(1, batch_size,)
+
+        # changeeeeeeeeee
+        samples = torch.randint(
+            low=0, high=self.vocabulary_size, size=(sample_length, batch_size)
         )
 
-        samples = [[] for i in range(batch_size)]
         pred = None
-        for i in range(sample_length):
+        for i in range(1, sample_length):
             # run network on sampled characters
-            if pred == None:
+            if i == 1:
                 out = self.forward(random_chars)
             else:
                 out = self.forward(pred)

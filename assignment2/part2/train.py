@@ -91,8 +91,8 @@ def train(args):
     # Training loop
     model = model.to(args.device)
     batch_n = len(data_loader)
+    model.train()
     for i in range(args.num_epochs):
-        model.train()
 
         # initialize metrics
         loss = 0
@@ -101,11 +101,11 @@ def train(args):
             batch = batch.to(args.device)
             labels = labels.to(args.device)
 
-            if not model_plotted:
-                writer.add_graph(model, batch)
-                model_plotted = True
-
             out = model(batch)
+
+            # if not model_plotted:
+            #     writer.add_graph(model, batch, verbose=True)
+            #     model_plotted = True
 
             out = out.view(-1, model.vocabulary_size)
             labels = labels.view(-1)
@@ -120,6 +120,9 @@ def train(args):
             torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip_grad_norm)
             optimizer.step()
 
+            model.lstm.h = None
+            model.lstm.c = None
+
         # add loss and acc to TensorBoard
         loss /= batch_n
         acc /= batch_n
@@ -127,12 +130,15 @@ def train(args):
         writer.add_scalar("Training Accuracy", acc, global_step=i + 1)
 
         # save model at epochs 1, 5, and end to generate sentences
-        os.makedirs("models/", exist_ok=True)
-        book_name = "_".join(
-            args.txt_file.replace("/", ".").replace("_", ".").split(".")[2:-1]
-        )
-        checkpoint_path = os.path.join("models", "lstm_" + book_name + str(i) + ".pth")
-        torch.save(model.state_dict(), checkpoint_path)
+        if i == 0 or i == 4 or i == args.num_epochs - 1:
+            os.makedirs("models/", exist_ok=True)
+            book_name = "_".join(
+                args.txt_file.replace("/", ".").replace("_", ".").split(".")[2:-1]
+            )
+            checkpoint_path = os.path.join(
+                "models", "lstm_" + book_name + str(i) + ".pth"
+            )
+            torch.save(model.state_dict(), checkpoint_path)
 
     #######################
     # END OF YOUR CODE    #
