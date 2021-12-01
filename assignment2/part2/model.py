@@ -228,7 +228,10 @@ class TextGenerationModel(nn.Module):
 
             # add results
             samples[i, :] = pred.squeeze()
+            if i == 1:
+                self.mode = "generate"
 
+        samples = samples.t().tolist()
         return samples
 
         #######################
@@ -261,8 +264,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     model = LSTM(5, 4)
     out = model.forward(nn.init.uniform_(torch.zeros(2, 3, 4)))
-    print(out)
-    print(out.shape)
+    # print(out)
+    # print(out.shape)
     text_gen = TextGenerationModel(args)
-    print(text_gen.sample()[0, :])
+    print(len(text_gen.sample()[0]))
 
