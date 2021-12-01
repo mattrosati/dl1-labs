@@ -125,6 +125,7 @@ class LSTM(nn.Module):
             self.h = torch.tanh(self.c) * o
             out[time, ...] = self.h
 
+        print(out.shape)
         return out
 
         #######################
@@ -216,7 +217,7 @@ class TextGenerationModel(nn.Module):
 
         for i in range(1, sample_length):
             # run network on sampled characters
-            out = self.forward(samples[i - 1, :].unsqueeze(dim=-1))
+            out = self.forward(samples[i - 1, :])
             print(out.shape)
 
             # perform softmax or argmax sampling
