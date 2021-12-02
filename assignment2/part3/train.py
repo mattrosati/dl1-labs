@@ -221,7 +221,6 @@ def train(
 
     losses = {"train": np.zeros(epochs), "val": np.zeros(epochs)}
     modes = ["train", "val"]
-    print(next(iter(train_dataloader)))
 
     best_loss = np.inf
 
