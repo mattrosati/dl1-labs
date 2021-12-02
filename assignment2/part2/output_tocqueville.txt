@@ -1,0 +1,177 @@
+Initialize dataset with 1148437 characters, 86 unique.
+initialized all parameters
+Found saved model at epoch 1
+Generating sentences:
+Using temp 0
+Sample 1
+. The same power of the United
+Sample 2
+American laws of the United St
+Sample 3
+Youth and the contract in the 
+Sample 4
+Lout the contract in the Unite
+Sample 5
+Q20000000000000000000000000000
+//
+Using temp 0.5
+Sample 1
+Zo the former of in the South 
+Sample 2
+See the plan of the United Sta
+Sample 3
+been contained in which are pe
+Sample 4
+merican power in America the p
+Sample 5
+! and the legislative body and
+//
+Using temp 1
+Sample 1
+: I small Govern St5tes, and t
+Sample 2
+Present that
+no society of the
+Sample 3
+per, which had now indired aft
+Sample 4
+Government, every speakings wh
+Sample 5
+ysions, in 1830, [176 to assum
+//
+Using temp 2.0
+Sample 1
+: pyove.
+3,067,7QPect).C 2699i
+Sample 2
+Unality in
+EldEETIylUpci6.--Tr
+Sample 3
+lsom
+sor, 89523, ban."
+6h
+"I*B
+Sample 4
+NJ:cqO"n
+Affectry-extendA2, Wi
+Sample 5
+uct brxaob%sathooEy.
+But won h
+//
+Initialize dataset with 1148437 characters, 86 unique.
+initialized all parameters
+Found saved model at epoch 5
+Generating sentences:
+Using temp 0
+Sample 1
+. The political world is to be
+Sample 2
+Americans of the United States
+Sample 3
+York is the consequence of the
+Sample 4
+Laws of the United States are 
+Sample 5
+Q000 fr.      Clerk with the p
+//
+Using temp 0.5
+Sample 1
+Zolitical consequences and the
+Sample 2
+See Act of June 22, 1787, vol.
+Sample 3
+be said that I do not denomina
+Sample 4
+merican people in
+the politica
+Sample 5
+! In the States which are demo
+//
+Using temp 1
+Sample 1
+: I sigle and end, at the pris
+Sample 2
+Present judgament must be look
+Sample 3
+per consequences which are
+acq
+Sample 4
+Government of the order of gov
+Sample 5
+ystem, and an annually people 
+//
+Using temp 2.0
+Sample 1
+: rvited
+centralized States, v
+Sample 2
+Union. But
+almost yosthoh: but
+Sample 3
+lsqu pliar more clap; 5,8,011)
+Sample 4
+NTDUTI f
+D]DFDempirst I3, Regi
+Sample 5
+ucuectuar
+(power, yoe-flext, f
+//
+Initialize dataset with 1148437 characters, 86 unique.
+initialized all parameters
+Found saved model at epoch 20
+Generating sentences:
+Using temp 0
+Sample 1
+. It may even be asserted that
+Sample 2
+American legislators there are
+Sample 3
+York, part i.
+chap. xi. vol. i
+Sample 4
+Louisiana as well as in the co
+Sample 5
+Quakers in the United States t
+//
+Using temp 0.5
+Sample 1
+Zoather, the country of the pe
+Sample 2
+States constitute a population
+Sample 3
+before the re-election of a pe
+Sample 4
+mes could be a political
+insti
+Sample 5
+!
+
+[Footnote k: See Appendix, 
+//
+Using temp 1
+Sample 1
+: I, Section 2, "Pubsions for 
+Sample 2
+President Jefferson's History,
+Sample 3
+phrapter XVIII: Future Conditi
+Sample 4
+Gutenberg-tm is system, origin
+Sample 5
+ystem--Reason of this
+system--
+//
+Using temp 2.0
+Sample 1
+: turpisame, on the one hand, 
+Sample 2
+Union. Clibe. In Externation m
+Sample 3
+ltup to: if the New Organ
+
+Peo
+Sample 4
+NLINTIBU EGENNTIONSSE FOR AGRE
+Sample 5
+uct from Bayargue will live as
+//
