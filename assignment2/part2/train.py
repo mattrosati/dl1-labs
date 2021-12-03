@@ -190,6 +190,10 @@ if __name__ == "__main__":
         "--seed", type=int, default=0, help="Seed for pseudo-random number generator"
     )
 
+    parser.add_argument(
+        "--sample_length", type=int, default=30, help="Length of sampled sentence"
+    )
+
     args = parser.parse_args()
     args.device = torch.device(
         "cuda" if torch.cuda.is_available() else "cpu"
@@ -212,7 +216,9 @@ if __name__ == "__main__":
         model.load_state_dict(torch.load(model_path, map_location=args.device))
         for temp in [0, 0.5, 1, 2.0]:
             print(f"Using temp {temp}")
-            sampled = model.sample(sample_length=30, batch_size=5, temperature=temp)
+            sampled = model.sample(
+                sample_length=args.sample_length, batch_size=5, temperature=temp
+            )
             for k, s in enumerate(sampled):
                 print(f"Sample {k+1}")
                 print(dataset.convert_to_string(s))
