@@ -1,0 +1,207 @@
+Initialize dataset with 1148437 characters, 86 unique.
+initialized all parameters
+Found saved model at epoch 1
+Generating sentences:
+Using temp 0
+Sample 1
+. The same power of the United States which is the same powe
+Sample 2
+American laws of the United States which is the same power o
+Sample 3
+Youth and the contract in the United States which is the sam
+Sample 4
+Lout the contract in the United States which is the same pow
+Sample 5
+Q20000000000000000000000000000000000000000000000000000,000 o
+//
+Using temp 0.5
+Sample 1
+can remains the case of considered, but they are a democrati
+Sample 2
+of the system of the United States of the Union in the Unite
+Sample 3
+d with the consequence of the United States, the tribunal of
+Sample 4
+0, and the exictive power of the United States which is ente
+Sample 5
+he laws, which were the same people which they are the case 
+//
+Using temp 1
+Sample 1
+zed by a
+certain that the case of the constitution of the
+Un
+Sample 2
+9l time all what offered like we quaulations; with bros out,
+Sample 3
+/blishing legishing the men who are removing it. -Adopt," fo
+Sample 4
+Ir arist equality and remote authority which individual have
+Sample 5
+ï
+except there. The
+perform works (acc of truth the habits--
+//
+Using temp 2.0
+Sample 1
+%B"gow spreads
+anyy-Plain. In Eudgcp,2l436;-8I]6 MI1,3R93,co
+Sample 2
+01794)slat, *1]7(Then.
+Can gavusm
+wheits ufor
+36*7 Ach Consp
+Sample 3
+7IE/;;ELBe LC)TE qIElgly *8,.(
+
+Futfor¿'oLey sXR6 LS36; afte
+Sample 4
+/apl, w
+Englefn Pu;Ho3es6h "tfunp
+4,039 4H.,
+RO,R140, 30407-
+Sample 5
+Achnica!
+Loryng.
+
+JugdicatesDiy."
+Seqje0tio" COtnobat!"/-4. 
+//
+Initialize dataset with 1148437 characters, 86 unique.
+initialized all parameters
+Found saved model at epoch 5
+Generating sentences:
+Using temp 0
+Sample 1
+. The political world is to be made between the country whic
+Sample 2
+Americans of the United States are the sole principle of the
+Sample 3
+York is the consequence of the country and the constitutions
+Sample 4
+Laws of the United States are the sole principle of the coun
+Sample 5
+Q000 fr.      Clerk with the principles of the country which
+//
+Using temp 0.5
+Sample 1
+cal power, and the people which was the right of a certain n
+Sample 2
+ons of the Union and the case of the Union and the consequen
+Sample 3
+d with the consequence of the country in power are not more 
+Sample 4
+000 fr.      Chink The House of Representatives is aristocra
+Sample 5
+he most prominent country which are
+still more discovered by
+//
+Using temp 1
+Sample 1
+zens subject the tocratic feeling which exists what republic
+Sample 2
+99 to of
+lest I have themselves by common authority to Virgi
+Sample 3
+/less the government in the
+formation of the Union by hither
+Sample 4
+In aristocracy--Plands of society.
+
+Therefore, the direction
+Sample 5
+ï
+except solution: and at this pream capable of such a repub
+//
+Using temp 2.0
+Sample 1
+%A
+opueritp, v9.5dy dilined them intims most opposed to impr
+Sample 2
+000.,
+wome! *as, plape genci.]lly
+viggrois stable--His copyh
+Sample 3
+773, nor take
+phavely, we do; 4 by; dey reny the Confederati
+Sample 4
+/eplapt
+amongst
+it loishes 3laths
+4,247 Collane under Georgi
+Sample 5
+Afford?
+
+In two Slave land toquen), the
+trud; [qunals him ch
+//
+Initialize dataset with 1148437 characters, 86 unique.
+initialized all parameters
+Found saved model at epoch 20
+Generating sentences:
+Using temp 0
+Sample 1
+. It may even be asserted that the people were used to repre
+Sample 2
+American legislators there are no nobles or to the advantage
+Sample 3
+York, part i.
+chap. xi. vol. i. pp. 336-364, exercises its s
+Sample 4
+Louisiana as well as in the course of the laws of the Union 
+Sample 5
+Quakers in the United States the most dangerous offenders, w
+//
+Using temp 0.5
+Sample 1
+ce of the several States will be applied to the maintenance 
+Sample 2
+of the two great nations the Union to the other hand, the pe
+Sample 3
+d very readily be understood. No
+sooner do you could profess
+Sample 4
+000 inhabitants to the square mile, the term for
+which they 
+Sample 5
+he majority of the people in public was the proper time to d
+//
+Using temp 1
+Sample 1
+zed countries, the French day are the most prominary and
+app
+Sample 2
+983:--1 Virgun
+14, 1856, and to Mexicia re-eminental princip
+Sample 3
+/gutenberg-tm. 511.
+
+Bold that some of them can never beque 
+Sample 4
+It is a President and the deserts, for the first time of dis
+Sample 5
+ï
+confined to the law, and its life are everything more inte
+//
+Using temp 2.0
+Sample 1
+%;
+sooner.
+
+1. .)2? It is equally comprehensive--Ihalls of t
+Sample 2
+0.9. 5in lard vegislation,
+if you you us!, voi. *i
+-21 In: C
+Sample 3
+74.]]
+
+[Footnbta.c. [Inle and 1,27831.z. Ins the English col
+Sample 4
+/functlack for I
+repress, D.]
+ Mr J....  LIM, I2P, 90 I less
+Sample 5
+Africa;
+*g order! by connectious Europe, or affluencies, alm
+//

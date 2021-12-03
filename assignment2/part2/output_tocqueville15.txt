@@ -1,0 +1,170 @@
+Initialize dataset with 1148437 characters, 86 unique.
+initialized all parameters
+Found saved model at epoch 1
+Generating sentences:
+Using temp 0
+Sample 1
+. The same powe
+Sample 2
+American laws o
+Sample 3
+Youth and the c
+Sample 4
+Lout the contra
+Sample 5
+Q20000000000000
+//
+Using temp 0.5
+Sample 1
+3, than the per
+Sample 2
+the United Stat
+Sample 3
+the extent of t
+Sample 4
+! consequences;
+Sample 5
+In America the 
+//
+Using temp 1
+Sample 1
+QLY,1800.]
+
+[Fo
+Sample 2
+Be can well. Hi
+Sample 3
+OZSECABITEE TOH
+Sample 4
+ïtive power of 
+Sample 5
+jurred
+to the b
+//
+Using temp 2.0
+Sample 1
+UXV-F6bNAGORUCK
+Sample 2
+bWons!R dwïnJ8i
+Sample 3
+2., yw. 350 rap
+Sample 4
+Verbode.
+NEXF78
+Sample 5
+$Y9ed, S;may-Ja
+//
+Initialize dataset with 1148437 characters, 86 unique.
+initialized all parameters
+Found saved model at epoch 5
+Generating sentences:
+Using temp 0
+Sample 1
+. The political
+Sample 2
+Americans of th
+Sample 3
+York is the con
+Sample 4
+Laws of the Uni
+Sample 5
+Q000 fr.      C
+//
+Using temp 0.5
+Sample 1
+3.]
+
+I have bee
+Sample 2
+tant to present
+Sample 3
+t as much as we
+Sample 4
+! South Carolin
+Sample 5
+In consequently
+//
+Using temp 1
+Sample 1
+QIn common stra
+Sample 2
+Book and this p
+Sample 3
+OV'
+
+A great pe
+Sample 4
+ïns; and as the
+Sample 5
+jury in the
+sam
+//
+Using temp 2.0
+Sample 1
+UTOBI.S, INETHE
+Sample 2
+batfrancesvee.-
+Sample 3
+2.7.xx 8.B.
+Han
+Sample 4
+Vatek ThEN-HIAC
+Sample 5
+$V392.) 2d2d, T
+//
+Initialize dataset with 1148437 characters, 86 unique.
+initialized all parameters
+Found saved model at epoch 20
+Generating sentences:
+Using temp 0
+Sample 1
+. It may even b
+Sample 2
+American legisl
+Sample 3
+York, part i.
+c
+Sample 4
+Louisiana as we
+Sample 5
+Quakers in the 
+//
+Using temp 0.5
+Sample 1
+30, the republi
+Sample 2
+t of the past,
+
+Sample 3
+t as a system, 
+Sample 4
+! See Appendix,
+Sample 5
+In America the 
+//
+Using temp 1
+Sample 1
+Quakers its rul
+Sample 2
+But even if the
+Sample 3
+Of Jude may
+suf
+Sample 4
+ïlory of all th
+Sample 5
+justice. The Am
+//
+Using temp 2.0
+Sample 1
+Union upon reco
+Sample 2
+bdued theyteld;
+Sample 3
+2.; won8 that o
+Sample 4
+Virginia
+keep; 
+Sample 5
+$903,000 were i
+//

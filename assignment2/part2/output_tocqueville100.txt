@@ -1,0 +1,225 @@
+Initialize dataset with 1148437 characters, 86 unique.
+initialized all parameters
+Found saved model at epoch 1
+Generating sentences:
+Using temp 0
+Sample 1
+. The same power of the United States which is the same power of the United States which is the same
+Sample 2
+American laws of the United States which is the same power of the United States which is the same po
+Sample 3
+Youth and the contract in the United States which is the same power of the United States which is th
+Sample 4
+Lout the contract in the United States which is the same power of the United States which is the sam
+Sample 5
+Q20000000000000000000000000000000000000000000000000000,000 of the United States which is the same po
+//
+Using temp 0.5
+Sample 1
+? You shall and the supreme Court of New York, when the Union of the county of the midst of the reac
+Sample 2
+ the United States the political contrast can only are obliged and the laws of the United States, bu
+Sample 3
+3, the United States, 1833, 1831, and it is a certain power of the Union were not only continued tha
+Sample 4
+7, on the same time of the
+United States in the Americans
+are at least the law which it was always b
+Sample 5
+$XXFOf Senate in America, that the condition of the United States, in New York.
+
+[Footnote i: The la
+//
+Using temp 1
+Sample 1
+obs; its existence of perform the most definitious attack; and the existence of climation to the sam
+Sample 2
+ic--United States would clatues to accompet, the political, possible, between the
+former taste witho
+Sample 3
+d To 1830. Tie clear its own pertain editanical place and the society is certain. The hospiral parti
+Sample 4
+y of no longer a very Alemin France Oh I have life and their equality and the
+servant that alloy in 
+Sample 5
+5ks, God. But this weide the
+sovereignty of the United States terrives from chappear 1,0007. )Thich 
+//
+Using temp 2.0
+Sample 1
+3?A,
+vr what,
+nucces-6W; (1d as howephicallivideme; ch.-eII":: I .1--502,030.. Ken texwCA.]6'4
+'mips
+Sample 2
+Yï
+LP,iccimul,K; moralize-loie; fo.
+Aj world.
+DMnI OU.9,46ffIM,8(8a3.],
+wi2, quackTusto!b wAsel. Fag
+Sample 3
+levy the
+Uy,."# il.. SIxq7T'1mr8T;)ns that.] /ag7, N80S,"Ho"mwits tederly
+;3,
+*w36"
+de
+tomm s
+iggere
+Sample 4
+,
+par,.)-1804; because,
+A pass---If.
+Its mulatively.
+x[3.R7.(,630: ¿S4,611dxA,VI48 tif
+NPodciskne No
+Sample 5
+uneev@]), $.0ens
+If daw., Bucchp,iani.]
+
+Man:afdatMy (verstrayingin. Remaid Itpix
+may kon d: Efoetsu
+//
+Initialize dataset with 1148437 characters, 86 unique.
+initialized all parameters
+Found saved model at epoch 5
+Generating sentences:
+Using temp 0
+Sample 1
+. The political world is to be made between the country which is the consequence of the country whic
+Sample 2
+Americans of the United States are the sole principle of the country which is the consequence of the
+Sample 3
+York is the consequence of the country and the constitutions of the Union and the constitutions of t
+Sample 4
+Laws of the United States are the sole principle of the country which is the consequence of the coun
+Sample 5
+Q000 fr.      Clerk with the principles of the country which is the consequence of the country which
+//
+Using temp 0.5
+Sample 1
+? This noble is not to make it in the political world light of all the powers of the Federal system 
+Sample 2
+ the Union; but the consequence of the sovereignty of the
+United States are not always abolished in 
+Sample 3
+3, should not be destroyed by the consequence of the people in the country which are not subject to 
+Sample 4
+7, the population of the
+people is not constrained to established the social condition of the countr
+Sample 5
+$41144, and Philadelphia, finds from the extreme than any other powers of the whole
+community, and t
+//
+Using temp 1
+Sample 1
+of Europe in the main of country. Not only to dread
+without their fortune, and they are contested, m
+Sample 2
+ic works politically taken up their
+onlinaries, from described my opinion, and very few recent to su
+Sample 3
+d States would
+be easy. In which are hastened conform a consideration of being, who have corporant t
+Sample 4
+y of
+its result as well as the class of citizens are work upon the name of President States
+mays be 
+Sample 5
+5: the freed men, with
+the daughter to conceive how should chance to which there are accested to a g
+//
+Using temp 2.0
+Sample 1
+354,
+vs where subdgnanham as much, ship coulsh; to dim it impresed, but is establied
+writding Lather
+Sample 2
+Yï
+Ha4th, It.
+This, Jortimorialed (Bef to,,00,000 Undeed, with teose up wice slass,"6pp1l)g rises ce
+Sample 3
+lfty unhanzaried. But by an avrionesh
+tempts are
+chamble rpartism.--"Torm Of A vola, c.merk n
+celeri
+Sample 4
+,
+quickener", and custom) representanchless' gives; Wvaid; affight.y Darbeys,
+theoes b% Normity: 'Ll
+Sample 5
+uneful equakivit; in Europe?
+83: ther, Yelf-6Y12.6 vA(waybou.]]
+
+[Footnote e:-Thy
+imselve if entertw
+//
+Initialize dataset with 1148437 characters, 86 unique.
+initialized all parameters
+Found saved model at epoch 20
+Generating sentences:
+Using temp 0
+Sample 1
+. It may even be asserted that the people were used to represent the majority of the people in publi
+Sample 2
+American legislators there are no nobles or to the advantage of the Americans to separate from the o
+Sample 3
+York, part i.
+chap. xi. vol. i. pp. 336-364, exercises its suppositions and the manners of the peopl
+Sample 4
+Louisiana as well as in the course of the laws of the Union are not at variance with the people from
+Sample 5
+Quakers in the United States the most dangerous offenders, whatever may be the professed against the
+//
+Using temp 0.5
+Sample 1
+? The selectmen are excited and another authority of the Federal Government has been abandoned to 3,
+Sample 2
+ the States in which the nation have sometimes met with a government which should only be extremely 
+Sample 3
+3. The distance from the same manner in order to destroy their race. The power of the majority of th
+Sample 4
+7.]
+
+[Footnote s: The selectmen are frequently happened before the Americans of the United States th
+Sample 5
+$35,000,000; it access the barbarians, and the most favorable to the veto of the whites in the Unite
+//
+Using temp 1
+Sample 1
+of Europe in politics have occasion to change their
+very is unable to conceive, I should only be per
+Sample 2
+ic works in foreign nations; and the Federal
+Government; but no sooner has hitherto been their respo
+Sample 3
+d as an extrem to the will terminate in the bosom of a
+dependent the elevated to, the lower classes 
+Sample 4
+y of the people at the
+actual enjoyment of facts an average had the ladge of its passions, and, in f
+Sample 5
+56.]
+
+[Footnote r: [This eBook of nations and good morals in that duty of the judges, and when the h
+//
+Using temp 2.0
+Sample 1
+328,
+whatever traces much branch totally oppose to fle human natical circumstances thus entqualized.
+Sample 2
+Yz LACTAL, WIDNCLUTN OR, DSTICL, H) Bu you po; I.
+
+I do not, rarber, value beyond rity--ffuced: is f
+Sample 3
+lixt, built than for newforces; they at given name, European?]
+
+Unled toach in vigi. S forth  See he
+Sample 4
+,
+since manBish--Ilpherable measure: nothing powers, you must obey you
+phissolved, the
+efficient cau
+Sample 5
+uneat. Men arrival, on, peculiar
+signanied felt good at this view; and she have was worth gaon persu
+//
