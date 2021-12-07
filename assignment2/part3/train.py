@@ -26,6 +26,8 @@ from torch_geometric.data.batch import Batch
 from torch_geometric.loader import DataLoader
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+import json
+import os
 
 from data import *
 from networks import *
@@ -261,14 +263,12 @@ def train(
                     best_model = deepcopy(model_temp)
                     best_loss = losses[m][epoch]
     # TODO: Test best model
-    print("Testing model...")
     test_loss = evaluate_model(best_model, test_dataloader, loss_module, permute=False)
-    print("Best model test loss:", test_loss)
     # TODO: Test best model against permuted indices
     permuted_test_loss = evaluate_model(
         best_model, test_dataloader, loss_module, permute=True
     )
-    print("Permuted best model test loss:", permuted_test_loss)
+
     # TODO: Add any information you might want to save for plotting
     val_losses = losses["val"]
     logging_info = losses["train"]
@@ -303,18 +303,45 @@ def main(**kwargs):
         raise NotImplementedError("only mlp and gnn are possible models.")
 
     model.to(device)
-    model, test_loss, permuted_test_loss, val_losses, logging_info = train(
-        model, **kwargs
-    )
+    results_path = os.path.join("results", which_model + ".json")
+    if not os.path.isfile(results_path):
+        model, test_loss, permuted_test_loss, val_losses, logging_info = train(
+            model, **kwargs
+        )
+        results = {
+            "model": which_model,
+            "unpermuted_test_loss": test_loss,
+            "permuted_test_loss": permuted_test_loss,
+            "val_losses": val_losses.tolist(),
+            "train_losses": logging_info.tolist(),
+        }
+        os.makedirs("results/", exist_ok=True)
+        with open(results_path, "w") as fp:
+            json.dump(results, fp)
+    else:
+        with open(results_path, "r") as f:
+            results = json.load(f)
 
     # plot the loss curve, etc. below.
+    print("Test loss:", results["unpermuted_test_loss"])
+    print("Permuted test loss:", results["permuted_test_loss"])
 
     f, ax = plt.subplots()
-    ax.plot(np.arange(1, len(val_losses) + 1), val_losses, "-bo", label="Validation")
-    ax.plot(np.arange(1, len(logging_info) + 1), logging_info, "-go", label="Training")
+    ax.plot(
+        np.arange(1, len(results["val_losses"]) + 1),
+        results["val_losses"],
+        "-bo",
+        label="Validation",
+    )
+    ax.plot(
+        np.arange(1, len(results["train_losses"]) + 1),
+        results["train_losses"],
+        "-go",
+        label="Training",
+    )
     ax.set_xlabel("Epochs")
     ax.set_ylabel("Average Loss")
-    ax.set_title("Average Loss per Epoch for " + which_model.upper())
+    ax.set_title("Average Loss per Epoch for " + results["model"].upper())
     ax.legend()
     plt.show()
 
