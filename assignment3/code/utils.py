@@ -96,7 +96,7 @@ def visualize_manifold(decoder, grid_size=20):
     # fetch equally spaced zs
     intervals = torch.arange(0.5 / grid_size, 1, step=1 / grid_size)
     z_scores = normal.icdf(intervals)
-    x, y = torch.meshgrid(z_scores, z_scores)
+    x, y = torch.meshgrid(z_scores, z_scores, indexing="ij")
     z = torch.stack([x.flatten(), y.flatten()], dim=1).to(decoder.device)
 
     # reconstruct images
