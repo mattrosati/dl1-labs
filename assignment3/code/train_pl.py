@@ -44,7 +44,6 @@ class VAE(pl.LightningModule):
 
         self.encoder = CNNEncoder(z_dim=z_dim, num_filters=num_filters)
         self.decoder = CNNDecoder(z_dim=z_dim, num_filters=num_filters)
-        self.lr = lr
 
     def forward(self, imgs):
         """
@@ -89,8 +88,12 @@ class VAE(pl.LightningModule):
         Outputs:
             x_samples - Sampled, 4-bit images. Shape: [B,C,H,W]
         """
-        x_samples = None
-        raise NotImplementedError
+        z = torch.randn(batch_size, self.hparams.z_dim).to(self.decoder.device)
+        out = torch.softmax(self.decoder(z), dim=1)
+        dists = torch.permute(out, (0, 2, 3, 1)).flatten(start_dim=0, end_dim=2)
+        sampled = torch.multinomial(dists, 1)
+        x_samples = sampled.reshape(batch_size, 1, out.shape[-2], out.shape[-1])
+
         return x_samples
 
     def configure_optimizers(self):
@@ -160,7 +163,24 @@ class GenerateCallback(pl.Callback):
         # - Use the torchvision function "make_grid" to create a grid of multiple images
         # - Use the torchvision function "save_image" to save an image grid to disk
 
-        raise NotImplementedError
+        x_samples = pl_module.sample(self.batch_size)
+
+        grid = make_grid(
+            x_samples.to(torch.float),
+            nrow=np.sqrt(x_samples.shape[0]).astype(int),
+            normalize=True,
+            value_range=(0, 15),
+        )
+
+        trainer.logger.experiment.add_image(
+            "Sampled", grid, global_step=trainer.global_step
+        )
+
+        if self.save_to_disk:
+            file_name = "sample_images_epoch" + str(epoch) + ".png"
+            save_image(
+                grid, os.path.join(trainer.logger.log_dir, file_name), normalize=False
+            )
 
 
 def train_vae(args):

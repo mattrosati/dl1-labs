@@ -90,8 +90,27 @@ def visualize_manifold(decoder, grid_size=20):
     # - You can use torchvision's function "make_grid" to combine the grid_size**2 images into a grid
     # - Remember to apply a sigmoid after the decoder
 
-    img_grid = None
-    raise NotImplementedError
+    # initialize normal
+    normal = torch.distributions.Normal(0, 1)
+
+    # fetch equally spaced zs
+    intervals = torch.arange(0.5 / grid_size, 1, step=1 / grid_size)
+    z_scores = normal.icdf(intervals)
+    x, y = torch.meshgrid(z_scores, z_scores)
+    z = torch.stack([x.flatten(), y.flatten()], dim=1).to(decoder.device)
+
+    # reconstruct images
+    out = torch.softmax(decoder(z), dim=1)
+
+    # reshape images
+    dists = torch.permute(out, (0, 2, 3, 1)).flatten(start_dim=0, end_dim=2)
+    sampled = torch.multinomial(dists, 1)
+    images = sampled.reshape(z.shape[0], 1, out.shape[-2], out.shape[-1])
+
+    # make grid
+    img_grid = make_grid(
+        images.to(torch.float), nrow=grid_size, normalize=True, value_range=(0, 15)
+    )
 
     return img_grid
 
