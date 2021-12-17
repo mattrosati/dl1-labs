@@ -23,7 +23,6 @@ import numpy as np
 
 
 class Binarize:
-
     def __init__(self, threshold):
         self.threshold = threshold
 
@@ -31,7 +30,11 @@ class Binarize:
         return (img > self.threshold).float()
 
 
-def fmnist(root='../data/', batch_size=128, num_workers=4, download=True):
+def not_a_lambda(x):
+    return (x * 16).long().clamp_(max=15)
+
+
+def fmnist(root="../data/", batch_size=128, num_workers=4, download=True):
     """
     Returns data loaders for 4-bit FashionMNIST dataset, i.e. values between 0 and 15.
 
@@ -44,31 +47,45 @@ def fmnist(root='../data/', batch_size=128, num_workers=4, download=True):
         download - If True, FashionMNIST is downloaded if it cannot be found in the specified
                    root directory.
     """
-    data_transforms = transforms.Compose([transforms.ToTensor(),
-                                          transforms.Lambda(lambda x: (x*16).long().clamp_(max=15))
-                                        ])
+    data_transforms = transforms.Compose(
+        [transforms.ToTensor(), transforms.Lambda(not_a_lambda)]
+    )
 
     dataset = torchvision.datasets.FashionMNIST(
-        root, train=True, transform=data_transforms, download=download)
+        root, train=True, transform=data_transforms, download=download
+    )
     test_set = torchvision.datasets.FashionMNIST(
-        root, train=False, transform=data_transforms, download=download)
+        root, train=False, transform=data_transforms, download=download
+    )
 
-    train_dataset, val_dataset = random_split(dataset, 
-                                              lengths=[54000, 6000],
-                                              generator=torch.Generator().manual_seed(42))
+    train_dataset, val_dataset = random_split(
+        dataset, lengths=[54000, 6000], generator=torch.Generator().manual_seed(42)
+    )
 
     # Each data loader returns tuples of (img, label)
     # For the generative models we don't need the labels, which we need to take into account
     # when writing the train code.
     train_loader = data.DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, 
-        pin_memory=True)
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers,
+        pin_memory=True,
+    )
     val_loader = data.DataLoader(
-        val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers,
-        drop_last=False)
+        val_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        drop_last=False,
+    )
     test_loader = data.DataLoader(
-        test_set, batch_size=batch_size, shuffle=False, num_workers=num_workers,
-        drop_last=False)
+        test_set,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        drop_last=False,
+    )
 
     return train_loader, val_loader, test_loader
 
