@@ -20,8 +20,9 @@ import numpy as np
 
 
 class CNNEncoder(nn.Module):
-    def __init__(self, num_input_channels: int = 1, num_filters: int = 32,
-                 z_dim: int = 20):
+    def __init__(
+        self, num_input_channels: int = 1, num_filters: int = 32, z_dim: int = 20
+    ):
         """Encoder with a CNN network
 
         Inputs:
@@ -33,10 +34,27 @@ class CNNEncoder(nn.Module):
         """
         super().__init__()
 
-        # For an intial architecture, you can use the encoder of Tutorial 9.
-        # Feel free to experiment with the architecture yourself, but the one specified here is
-        # sufficient for the assignment.
-        raise NotImplementedError
+        c_hid = num_filters
+        self.net = nn.Sequential(
+            nn.Conv2d(
+                num_input_channels, c_hid, kernel_size=3, padding=1, stride=2
+            ),  # 28x28 => 14x14
+            nn.GELU(),
+            nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1),
+            nn.GELU(),
+            nn.Conv2d(
+                c_hid, 2 * c_hid, kernel_size=3, padding=1, stride=2
+            ),  # 14x14 => 7x7
+            nn.GELU(),
+            nn.Conv2d(2 * c_hid, 2 * c_hid, kernel_size=3, padding=1),
+            nn.GELU(),
+            nn.Conv2d(
+                2 * c_hid, 2 * c_hid, kernel_size=3, padding=1, stride=2
+            ),  # 7x7 => 4x4
+            nn.GELU(),
+            nn.Flatten(),  # Image grid to single feature vector
+            nn.Linear(2 * 16 * c_hid, 2 * z_dim),
+        )
 
     def forward(self, x):
         """
@@ -48,15 +66,15 @@ class CNNEncoder(nn.Module):
                       of the latent distributions.
         """
         x = x.float() / 15 * 2.0 - 1.0  # Move images between -1 and 1
-        mean = None
-        log_std = None
-        raise NotImplementedError
+        out = self.net(x)
+        mean, log_std = torch.chunk(out, 2, dim=-1)
         return mean, log_std
 
 
 class CNNDecoder(nn.Module):
-    def __init__(self, num_input_channels: int = 16, num_filters: int = 32,
-                 z_dim: int = 20):
+    def __init__(
+        self, num_input_channels: int = 16, num_filters: int = 32, z_dim: int = 20
+    ):
         """Decoder with a CNN network.
 
         Inputs:
@@ -68,10 +86,35 @@ class CNNDecoder(nn.Module):
         """
         super().__init__()
 
-        # For an intial architecture, you can use the decoder of Tutorial 9.
-        # Feel free to experiment with the architecture yourself, but the one specified here is
-        # sufficient for the assignment.
-        raise NotImplementedError
+        c_hid = num_filters
+        self.linear = nn.Sequential(nn.Linear(z_dim, 2 * 16 * c_hid), nn.GELU())
+        self.net = nn.Sequential(
+            nn.ConvTranspose2d(
+                2 * c_hid,
+                2 * c_hid,
+                kernel_size=3,
+                output_padding=0,
+                padding=1,
+                stride=2,
+            ),  # 4x4 => 7x7
+            nn.GELU(),
+            nn.Conv2d(2 * c_hid, 2 * c_hid, kernel_size=3, padding=1),
+            nn.GELU(),
+            nn.ConvTranspose2d(
+                2 * c_hid, c_hid, kernel_size=3, output_padding=1, padding=1, stride=2
+            ),  # 7x7 => 14x14
+            nn.GELU(),
+            nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1),
+            nn.GELU(),
+            nn.ConvTranspose2d(
+                c_hid,
+                num_input_channels,
+                kernel_size=3,
+                output_padding=1,
+                padding=1,
+                stride=2,
+            ),  # 14x14 => 28x28
+        )
 
     def forward(self, z):
         """
@@ -83,8 +126,9 @@ class CNNDecoder(nn.Module):
                 Shape: [B,num_input_channels,28,28]
         """
 
-        x = None
-        raise NotImplementedError
+        x = self.linear(z)
+        x = x.reshape(x.shape[0], -1, 4, 4)
+        x = self.net(x)
         return x
 
     @property
