@@ -64,8 +64,10 @@ def elbo_to_bpd(elbo, img_shape):
     Outputs:
         bpd - The negative log likelihood in bits per dimension for the given image.
     """
-    denom = torch.tensor(img_shape[1:]).prod()
-    bpd = (elbo * torch.log2(torch.exp(torch.ones(1)))) / denom
+    device = elbo.device
+    denom = torch.tensor(img_shape[1:]).prod().to(device)
+    prod = torch.log2(torch.exp(torch.ones(elbo.shape))).to(device)
+    bpd = (elbo * prod) / denom
     return bpd
 
 
