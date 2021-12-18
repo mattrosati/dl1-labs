@@ -172,9 +172,7 @@ class GenerateCallback(pl.Callback):
             value_range=(0, 15),
         )
 
-        trainer.logger.experiment.add_image(
-            "Sampled", grid, global_step=trainer.global_step
-        )
+        trainer.logger.experiment.add_image("Sampled", grid, epoch)
 
         if self.save_to_disk:
             file_name = "sample_images_epoch" + str(epoch) + ".png"
